@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:workoutplanner/exercise_list/screen_exercise_list.dart';
+import 'package:workoutplanner/testing/screen_test.dart';
 import '../workout_list/screen_workout_list.dart';
 
 class Home extends StatelessWidget {
@@ -27,6 +28,14 @@ class Home extends StatelessWidget {
                 ),
               ),
               child: const Text("Exercises"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const TestScreen(),
+                ),
+              ),
+              child: const Text("Test"),
             )
           ],
         ),

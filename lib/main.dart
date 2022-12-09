@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:workoutplanner/exercise_list/models/exercise.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:workoutplanner/utils/isar_service.dart';
 import 'home/index.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  IsarServices();
 
-  await Hive.initFlutter();
-
-  Hive.registerAdapter(ExerciseAdapter());
-  await Hive.openBox<Exercise>('exercise');
-
-  runApp(const App());
+  runApp(const ProviderScope(child: App()));
 }
 
 class App extends StatelessWidget {

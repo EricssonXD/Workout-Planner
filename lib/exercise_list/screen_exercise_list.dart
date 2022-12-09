@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:workoutplanner/exercise_list/screen_edit_exercise.dart';
 
 class ExerciseList extends StatefulWidget {
   const ExerciseList({super.key});
@@ -29,6 +30,11 @@ class _ExerciseListState extends State<ExerciseList> {
           SpeedDialChild(
             child: const Icon(Icons.add),
             label: "Add New",
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: ((context) => ExerciseEditScreen()),
+              ),
+            ),
           ),
         ],
       ),
