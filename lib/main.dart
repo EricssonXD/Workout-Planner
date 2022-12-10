@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:workoutplanner/utils/isar_service.dart';
 import 'home/index.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  IsarServices();
+  // IsarServices();
 
   runApp(const ProviderScope(child: App()));
 }

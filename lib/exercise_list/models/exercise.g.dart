@@ -93,8 +93,18 @@ int _exerciseEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.name.length * 3;
-  bytesCount += 3 + object.videoLink.length * 3;
-  bytesCount += 3 + object.videoPath.length * 3;
+  {
+    final value = object.videoLink;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.videoPath;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -128,8 +138,8 @@ Exercise _exerciseDeserialize(
   object.isLocalVideo = reader.readBool(offsets[3]);
   object.isTimedExercise = reader.readBool(offsets[4]);
   object.name = reader.readString(offsets[5]);
-  object.videoLink = reader.readString(offsets[6]);
-  object.videoPath = reader.readString(offsets[7]);
+  object.videoLink = reader.readStringOrNull(offsets[6]);
+  object.videoPath = reader.readStringOrNull(offsets[7]);
   return object;
 }
 
@@ -153,9 +163,9 @@ P _exerciseDeserializeProp<P>(
     case 5:
       return (reader.readString(offset)) as P;
     case 6:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -759,8 +769,24 @@ extension ExerciseQueryFilter
     });
   }
 
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> videoLinkIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'videoLink',
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> videoLinkIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'videoLink',
+      ));
+    });
+  }
+
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> videoLinkEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -773,7 +799,7 @@ extension ExerciseQueryFilter
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> videoLinkGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -788,7 +814,7 @@ extension ExerciseQueryFilter
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> videoLinkLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -803,8 +829,8 @@ extension ExerciseQueryFilter
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> videoLinkBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -890,8 +916,24 @@ extension ExerciseQueryFilter
     });
   }
 
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> videoPathIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'videoPath',
+      ));
+    });
+  }
+
+  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> videoPathIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'videoPath',
+      ));
+    });
+  }
+
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> videoPathEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -904,7 +946,7 @@ extension ExerciseQueryFilter
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> videoPathGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -919,7 +961,7 @@ extension ExerciseQueryFilter
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> videoPathLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -934,8 +976,8 @@ extension ExerciseQueryFilter
   }
 
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> videoPathBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -1335,15 +1377,64 @@ extension ExerciseQueryProperty
     });
   }
 
-  QueryBuilder<Exercise, String, QQueryOperations> videoLinkProperty() {
+  QueryBuilder<Exercise, String?, QQueryOperations> videoLinkProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'videoLink');
     });
   }
 
-  QueryBuilder<Exercise, String, QQueryOperations> videoPathProperty() {
+  QueryBuilder<Exercise, String?, QQueryOperations> videoPathProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'videoPath');
     });
   }
 }
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// ignore_for_file: avoid_private_typedef_functions, non_constant_identifier_names, subtype_of_sealed_class, invalid_use_of_internal_member, unused_element, constant_identifier_names, unnecessary_raw_strings, library_private_types_in_public_api
+
+/// Copied from Dart SDK
+class _SystemHash {
+  _SystemHash._();
+
+  static int combine(int hash, int value) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + value);
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
+    return hash ^ (hash >> 6);
+  }
+
+  static int finish(int hash) {
+    // ignore: parameter_assignments
+    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+    // ignore: parameter_assignments
+    hash = hash ^ (hash >> 11);
+    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  }
+}
+
+String $exerciseManagerHash() => r'582e609e86e5980085c3ef60b92899e9f0ff8565';
+
+/// See also [exerciseManager].
+final exerciseManagerProvider = AutoDisposeFutureProvider<ExerciseManager>(
+  exerciseManager,
+  name: r'exerciseManagerProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : $exerciseManagerHash,
+);
+typedef ExerciseManagerRef = AutoDisposeFutureProviderRef<ExerciseManager>;
+String $getExercisesHash() => r'b36b954a5840ec5f7836b5ffaf74da0135110811';
+
+/// See also [getExercises].
+final getExercisesProvider = AutoDisposeFutureProvider<List<Exercise>>(
+  getExercises,
+  name: r'getExercisesProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : $getExercisesHash,
+);
+typedef GetExercisesRef = AutoDisposeFutureProviderRef<List<Exercise>>;

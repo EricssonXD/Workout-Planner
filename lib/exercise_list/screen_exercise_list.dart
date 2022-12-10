@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:workoutplanner/exercise_list/models/exercise.dart';
 import 'package:workoutplanner/exercise_list/screen_edit_exercise.dart';
 
-class ExerciseList extends StatefulWidget {
+class ExerciseList extends ConsumerWidget {
   const ExerciseList({super.key});
 
+  // List<String> list = List<String>.generate(10000, (i) => 'Item $i')
   @override
-  State<ExerciseList> createState() => _ExerciseListState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final exerciseList = ref.watch(getExercisesProvider);
 
-class _ExerciseListState extends State<ExerciseList> {
-  List<String> list = List<String>.generate(10000, (i) => 'Item $i');
-  // List<String> list = [];
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Exercise List"),
@@ -38,19 +35,25 @@ class _ExerciseListState extends State<ExerciseList> {
           ),
         ],
       ),
-      body: listbuilder(),
+      body: exerciseList.when(
+        data: (list) {
+          return listbuilder(list);
+        },
+        loading: (() => const CircularProgressIndicator()),
+        error: ((error, stack) => Text(error.toString())),
+      ),
     );
   }
 
-  Widget listbuilder() {
+  Widget listbuilder(List<Exercise> list) {
     return ListView.builder(
       itemCount: list.length,
-      prototypeItem: ListTile(
-        title: Text(list.first),
+      prototypeItem: const ListTile(
+        title: Text("list.first.name"),
       ),
       itemBuilder: (context, index) {
         return ListTile(
-          title: Text(list[index]),
+          title: Text(list[index].name),
         );
       },
     );

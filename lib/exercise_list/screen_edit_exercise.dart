@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:workoutplanner/exercise_list/models/exercise.dart';
 
-class ExerciseEditScreen extends StatelessWidget {
+class ExerciseEditScreen extends ConsumerWidget {
   ExerciseEditScreen({super.key});
 
   final TextEditingController _controllerTitle = TextEditingController();
@@ -10,7 +11,20 @@ class ExerciseEditScreen extends StatelessWidget {
   final TextEditingController _controllerSets = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // final exerciseManager = ref.watch(exerciseManagerProvider.future);
+
+    void submitForm() async {
+      Exercise newExercise = Exercise()
+        ..name = _controllerTitle.text
+        ..defaultReps = int.parse(_controllerReps.text)
+        ..defaultSets = int.parse(_controllerSets.text);
+      ref
+          .read(exerciseManagerProvider.future)
+          .then((value) => value.addExercise(newExercise));
+      Navigator.of(context).pop();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Edit Exercise"),
@@ -21,7 +35,7 @@ class ExerciseEditScreen extends StatelessWidget {
           formNumberBox(_controllerReps),
           formNumberBox(_controllerSets),
           ElevatedButton(
-              onPressed: () => print("yeet"), child: const Text("Done")),
+              onPressed: () => submitForm(), child: const Text("Done")),
         ]),
       ),
     );
@@ -41,12 +55,5 @@ class ExerciseEditScreen extends StatelessWidget {
     return TextFormField(
       controller: controller,
     );
-  }
-
-  void submitForm() {
-    Exercise newExercise = Exercise()
-      ..name = _controllerTitle.text
-      ..defaultReps = _controllerReps.text as int
-      ..defaultSets = _controllerSets.text as int;
   }
 }

@@ -1,4 +1,6 @@
 import 'package:isar/isar.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../utils/providers/isar.dart';
 
 part 'exercise.g.dart';
 
@@ -9,17 +11,70 @@ class Exercise {
   @Index(type: IndexType.value)
   late String name;
 
-  late int defaultRestTime;
+  int defaultRestTime = 120;
 
-  late int defaultReps;
+  int defaultReps = 12;
 
-  late bool isTimedExercise;
+  bool isTimedExercise = false;
 
-  late int defaultSets;
+  int defaultSets = 3;
 
-  late String videoLink;
+  String? videoLink;
 
-  late String videoPath;
+  String? videoPath;
 
-  late bool isLocalVideo;
+  bool isLocalVideo = false;
 }
+
+class ExerciseManager {
+  final Isar isar;
+
+  ExerciseManager(this.isar);
+
+  Future<void> addExercise(Exercise newExercise) async {
+    await isar.writeTxn(() async {
+      await isar.exercises.put(newExercise);
+    });
+  }
+
+  Future<List<Exercise>> getExercises() async {
+    return isar.exercises.where().sortByName().findAll();
+  }
+}
+
+@riverpod
+Future<ExerciseManager> exerciseManager(ExerciseManagerRef ref) async {
+  final isar = await ref.watch(isarInstanceProvider.future);
+  return ExerciseManager(isar);
+}
+
+@riverpod
+Future<List<Exercise>> getExercises(GetExercisesRef ref) async {
+  final exerciseManager = await ref.watch(exerciseManagerProvider.future);
+  return exerciseManager.getExercises();
+}
+
+
+// class ScoreManager {
+//   final Isar isar;
+
+//   ScoreManager(this.isar);
+
+//   Future<void> addScore(String name, int score) async {
+//     final newScore = Score()
+//       ..name = name
+//       ..score = score;
+
+//     await isar.writeTxn(() async {
+//       await isar.scores.put(newScore);
+//     });
+//   }
+
+//   Future<List<Score>> getScores() async {
+//     return isar.scores.where().sortByScoreDesc().findAll();
+//   }
+
+//   Future<List<Score>> getHighScores() async {
+//     return isar.scores.where().sortByScoreDesc().limit(8).findAll();
+//   }
+// }
