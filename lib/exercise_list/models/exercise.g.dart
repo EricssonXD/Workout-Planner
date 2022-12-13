@@ -67,8 +67,8 @@ const ExerciseSchema = CollectionSchema(
     r'name': IndexSchema(
       id: 879695947855722453,
       name: r'name',
-      unique: false,
-      replace: false,
+      unique: true,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'name',
@@ -181,6 +181,60 @@ List<IsarLinkBase<dynamic>> _exerciseGetLinks(Exercise object) {
 
 void _exerciseAttach(IsarCollection<dynamic> col, Id id, Exercise object) {
   object.id = id;
+}
+
+extension ExerciseByIndex on IsarCollection<Exercise> {
+  Future<Exercise?> getByName(String name) {
+    return getByIndex(r'name', [name]);
+  }
+
+  Exercise? getByNameSync(String name) {
+    return getByIndexSync(r'name', [name]);
+  }
+
+  Future<bool> deleteByName(String name) {
+    return deleteByIndex(r'name', [name]);
+  }
+
+  bool deleteByNameSync(String name) {
+    return deleteByIndexSync(r'name', [name]);
+  }
+
+  Future<List<Exercise?>> getAllByName(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return getAllByIndex(r'name', values);
+  }
+
+  List<Exercise?> getAllByNameSync(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return getAllByIndexSync(r'name', values);
+  }
+
+  Future<int> deleteAllByName(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return deleteAllByIndex(r'name', values);
+  }
+
+  int deleteAllByNameSync(List<String> nameValues) {
+    final values = nameValues.map((e) => [e]).toList();
+    return deleteAllByIndexSync(r'name', values);
+  }
+
+  Future<Id> putByName(Exercise object) {
+    return putByIndex(r'name', object);
+  }
+
+  Id putByNameSync(Exercise object, {bool saveLinks = true}) {
+    return putByIndexSync(r'name', object, saveLinks: saveLinks);
+  }
+
+  Future<List<Id>> putAllByName(List<Exercise> objects) {
+    return putAllByIndex(r'name', objects);
+  }
+
+  List<Id> putAllByNameSync(List<Exercise> objects, {bool saveLinks = true}) {
+    return putAllByIndexSync(r'name', objects, saveLinks: saveLinks);
+  }
 }
 
 extension ExerciseQueryWhereSort on QueryBuilder<Exercise, Exercise, QWhere> {
@@ -1415,6 +1469,27 @@ class _SystemHash {
     hash = hash ^ (hash >> 11);
     return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
   }
+}
+
+String $ExerciseListNotifierHash() =>
+    r'fecd3abcf7b86a339d9c8a470f5a5246bde27817';
+
+/// See also [ExerciseListNotifier].
+final exerciseListNotifierProvider =
+    AutoDisposeAsyncNotifierProvider<ExerciseListNotifier, List<Exercise>>(
+  ExerciseListNotifier.new,
+  name: r'exerciseListNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : $ExerciseListNotifierHash,
+);
+typedef ExerciseListNotifierRef
+    = AutoDisposeAsyncNotifierProviderRef<List<Exercise>>;
+
+abstract class _$ExerciseListNotifier
+    extends AutoDisposeAsyncNotifier<List<Exercise>> {
+  @override
+  FutureOr<List<Exercise>> build();
 }
 
 String $exerciseManagerHash() => r'582e609e86e5980085c3ef60b92899e9f0ff8565';

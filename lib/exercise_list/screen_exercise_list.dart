@@ -10,7 +10,7 @@ class ExerciseList extends ConsumerWidget {
   // List<String> list = List<String>.generate(10000, (i) => 'Item $i')
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final exerciseList = ref.watch(getExercisesProvider);
+    final exerciseList = ref.watch(exerciseListNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -35,11 +35,12 @@ class ExerciseList extends ConsumerWidget {
           ),
         ],
       ),
+      // body: listbuilder(exerciseList),
       body: exerciseList.when(
         data: (list) {
           return listbuilder(list);
         },
-        loading: (() => const CircularProgressIndicator()),
+        loading: (() => const Center(child: CircularProgressIndicator())),
         error: ((error, stack) => Text(error.toString())),
       ),
     );

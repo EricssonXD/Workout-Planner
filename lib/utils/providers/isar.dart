@@ -7,15 +7,19 @@ part 'isar.g.dart';
 
 @Riverpod(keepAlive: true)
 Future<Isar> isarInstance(FutureProviderRef ref) async {
+  late Future<Isar> isar;
+
   if (Isar.instanceNames.isEmpty) {
     final dir = await getApplicationSupportDirectory();
-    return await Isar.open(
+    isar = Isar.open(
       [
         ExerciseSchema,
       ],
       inspector: true,
       directory: dir.path,
     );
+  } else {
+    isar = Future.value(Isar.getInstance());
   }
-  return Future.value(Isar.getInstance());
+  return isar;
 }

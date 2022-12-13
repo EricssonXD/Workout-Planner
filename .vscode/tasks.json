@@ -7,7 +7,11 @@
             "label": "Auto BuildRunner",
             "type": "shell",
             "command": "dart run build_runner watch",
-            "problemMatcher": []
+            "problemMatcher": [],
+            "runOptions": {
+                "runOn": "folderOpen",
+            }
+            
         }
     ]
 }

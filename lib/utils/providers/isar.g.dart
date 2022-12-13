@@ -29,7 +29,7 @@ class _SystemHash {
   }
 }
 
-String $isarInstanceHash() => r'6b96a3580a6121fee856e003f0672ef9d8cc62b1';
+String $isarInstanceHash() => r'89799c60aa25a3b2966626a5ac6cee335fad36a5';
 
 /// See also [isarInstance].
 final isarInstanceProvider = FutureProvider<Isar>(

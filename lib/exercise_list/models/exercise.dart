@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../utils/providers/isar.dart';
@@ -8,7 +11,7 @@ part 'exercise.g.dart';
 class Exercise {
   Id id = Isar.autoIncrement;
 
-  @Index(type: IndexType.value)
+  @Index(type: IndexType.value, unique: true, replace: true)
   late String name;
 
   int defaultRestTime = 120;
@@ -29,7 +32,9 @@ class Exercise {
 class ExerciseManager {
   final Isar isar;
 
-  ExerciseManager(this.isar);
+  ExerciseManager(this.isar) {
+    debugPrint("init ExerciseManager");
+  }
 
   Future<void> addExercise(Exercise newExercise) async {
     await isar.writeTxn(() async {
@@ -39,6 +44,12 @@ class ExerciseManager {
 
   Future<List<Exercise>> getExercises() async {
     return isar.exercises.where().sortByName().findAll();
+  }
+
+  void deleteAllExercise() async {
+    await isar.writeTxn(() async {
+      await isar.exercises.filter().idGreaterThan(-1).deleteAll();
+    });
   }
 }
 
@@ -52,6 +63,41 @@ Future<ExerciseManager> exerciseManager(ExerciseManagerRef ref) async {
 Future<List<Exercise>> getExercises(GetExercisesRef ref) async {
   final exerciseManager = await ref.watch(exerciseManagerProvider.future);
   return exerciseManager.getExercises();
+}
+
+// final exerciseListProvider =
+//     AsyncNotifierProvider.autoDispose<ExerciseListNotifier, List<Exercise>>(
+//         ExerciseListNotifier.new);
+
+@riverpod
+class ExerciseListNotifier extends _$ExerciseListNotifier {
+  late StreamSubscription<void> watcher;
+
+  @override
+  FutureOr<List<Exercise>> build() async {
+    autoRefresh();
+    ref.onDispose(() => watcher.cancel());
+    final exerciseManager = await ref.watch(exerciseManagerProvider.future);
+    return await exerciseManager.getExercises();
+  }
+
+  autoRefresh() async {
+    // refresh();
+    debugPrint('autorefresh called');
+    Isar isar = await ref.watch(isarInstanceProvider.future);
+    Stream<void> onChange = isar.exercises.watchLazy();
+
+    watcher = onChange.listen((e) async {
+      debugPrint("autoRefreshed");
+      refresh();
+    });
+  }
+
+  Future<void> refresh() async {
+    final exerciseManager = await ref.watch(exerciseManagerProvider.future);
+    state = AsyncValue.data(await exerciseManager.getExercises());
+    debugPrint("Notifier Got Exercise List");
+  }
 }
 
 
