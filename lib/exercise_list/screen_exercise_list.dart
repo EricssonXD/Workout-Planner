@@ -5,7 +5,8 @@ import 'package:workoutplanner/exercise_list/models/exercise.dart';
 import 'package:workoutplanner/exercise_list/screen_edit_exercise.dart';
 
 class ExerciseList extends ConsumerWidget {
-  const ExerciseList({super.key});
+  const ExerciseList({super.key, this.picker = false});
+  final bool picker;
 
   // List<String> list = List<String>.generate(10000, (i) => 'Item $i')
   @override
@@ -29,7 +30,7 @@ class ExerciseList extends ConsumerWidget {
             label: "Add New",
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
-                builder: ((context) => ExerciseEditScreen()),
+                builder: ((context) => const ExerciseEditScreen()),
               ),
             ),
           ),
@@ -55,6 +56,12 @@ class ExerciseList extends ConsumerWidget {
       itemBuilder: (context, index) {
         return ListTile(
           title: Text(list[index].name),
+          onTap: () => picker
+              ? Navigator.of(context).pop(list[index])
+              : Navigator.of(context).push(MaterialPageRoute(
+                  builder: ((context) =>
+                      ExerciseEditScreen(targetExercise: list[index])),
+                )),
         );
       },
     );

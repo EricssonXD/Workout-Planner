@@ -2,6 +2,7 @@ import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:workoutplanner/exercise_list/models/exercise.dart';
+import 'package:workoutplanner/workout_list/models/workouts.dart';
 
 part 'isar.g.dart';
 
@@ -14,6 +15,7 @@ Future<Isar> isarInstance(FutureProviderRef ref) async {
     isar = Isar.open(
       [
         ExerciseSchema,
+        WorkoutSchema,
       ],
       inspector: true,
       directory: dir.path,

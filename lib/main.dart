@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'home/index.dart';
+import 'home/screen_home.dart';
 
 Future main() async {
   // WidgetsFlutterBinding.ensureInitialized();
   // IsarServices();
 
-  runApp(const ProviderScope(child: App()));
+  runApp(const ProviderScope(
+      child: App())); //Wrap in provider scope for riverpod to work
 }
 
 class App extends StatelessWidget {
@@ -15,6 +16,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Home(),
     );
   }
