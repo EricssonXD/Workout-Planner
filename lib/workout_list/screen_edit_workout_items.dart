@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:workoutplanner/exercise_list/models/exercise.dart';
@@ -22,11 +23,18 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
   bool createNew = true;
   bool editing = true;
   bool nameExists = false;
+  bool requireRepInput = true;
 
   late WorkoutItem targetWorkoutItem;
   Exercise? pickedExercise;
 
+  final _repFormKey = GlobalKey();
+
   final TextEditingController _controllerTitle = TextEditingController();
+  final TextEditingController _controllerReps = TextEditingController();
+  final TextEditingController _controllerRestTime = TextEditingController();
+  final TextEditingController _controllerSets = TextEditingController();
+  ExerciseRepType repType = ExerciseRepType.reps;
 
   @override
   void initState() {
@@ -34,8 +42,11 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
     if (widget.targetWorkoutItem != null) {
       targetWorkoutItem = widget.targetWorkoutItem!;
       createNew = false;
-      editing = false;
-      _controllerTitle.text = targetWorkoutItem.name;
+      editing = true;
+      _controllerReps.text = targetWorkoutItem.reps.toString();
+      _controllerRestTime.text = targetWorkoutItem.restTime.toString();
+      _controllerSets.text = targetWorkoutItem.sets.toString();
+      repType = targetWorkoutItem.exerciseCountType;
       ref.read(isarInstanceProvider.future).then((value) async {
         pickedExercise = await value.exercises
             .filter()
@@ -53,7 +64,12 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
 
       WorkoutItem newItem = WorkoutItem()
         ..name = pickedExercise!.name
-        ..id = pickedExercise!.id;
+        ..id = pickedExercise!.id
+        ..exerciseCountType = repType
+        ..reps = int.parse(_controllerReps.text)
+        ..sets = int.parse(_controllerSets.text)
+        ..restTime = int.parse(_controllerRestTime.text);
+
       Navigator.of(context).pop(newItem);
     }
 
@@ -107,6 +123,15 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
         child: Column(
           children: [
             exercisePicker(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                requireRepInput ? repForm() : Container(),
+                repsTypeForm(),
+              ],
+            ),
+            setForm(),
+            restTimeForm(),
           ],
         ),
       ),
@@ -121,7 +146,7 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
       );
     } else {
       return ListTile(
-        title: Text("${pickedExercise!.name} * ${pickedExercise!.defaultReps}"),
+        title: Center(child: Text("Exercise: ${pickedExercise!.name}")),
         onTap: () => pickExercise(),
       );
     }
@@ -155,6 +180,110 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
         decoration: const InputDecoration(
           label: Text("Name of Workout"),
           hintText: "My Chest Workout",
+        ),
+      ),
+    );
+  }
+
+  Widget repForm() {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 200),
+      child: TextFormField(
+        enabled: editing,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            _controllerReps.text = "8";
+          }
+          return null;
+        },
+        keyboardType: TextInputType.number,
+        controller: _controllerReps,
+        inputFormatters: <TextInputFormatter>[
+          FilteringTextInputFormatter.digitsOnly,
+        ],
+        decoration: InputDecoration(
+          label: repFormInputText(),
+          hintText: "8",
+        ),
+      ),
+    );
+  }
+
+  Widget repFormInputText() {
+    switch (repType) {
+      case ExerciseRepType.reps:
+        return const Text("Number of Reps");
+      case ExerciseRepType.timed:
+        return const Text("Duration of Exercise");
+      default:
+        return const Text("");
+    }
+  }
+
+  Widget repsTypeForm() {
+    return DropdownButton<ExerciseRepType>(
+        key: _repFormKey,
+        value: repType,
+        onChanged: (ExerciseRepType? newValue) {
+          setState(() {
+            repType = newValue ?? ExerciseRepType.reps;
+            if (repType == ExerciseRepType.maxRep ||
+                repType == ExerciseRepType.maxTime) {
+              requireRepInput = false;
+            } else {
+              requireRepInput = true;
+            }
+          });
+        },
+        items: ExerciseRepType.values.map((ExerciseRepType repType) {
+          return DropdownMenuItem<ExerciseRepType>(
+              value: repType, child: Text(repType.toString()));
+        }).toList());
+  }
+
+  Widget setForm() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextFormField(
+        enabled: editing,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            _controllerSets.text = '3';
+          }
+          return null;
+        },
+        keyboardType: TextInputType.number,
+        controller: _controllerSets,
+        inputFormatters: <TextInputFormatter>[
+          FilteringTextInputFormatter.digitsOnly,
+        ],
+        decoration: const InputDecoration(
+          label: Text("Number of Sets"),
+          hintText: "3",
+        ),
+      ),
+    );
+  }
+
+  Widget restTimeForm() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextFormField(
+        enabled: editing,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            _controllerRestTime.text = "60";
+          }
+          return null;
+        },
+        keyboardType: TextInputType.number,
+        controller: _controllerRestTime,
+        inputFormatters: <TextInputFormatter>[
+          FilteringTextInputFormatter.digitsOnly,
+        ],
+        decoration: const InputDecoration(
+          label: Text("Rest Time"),
+          hintText: "60",
         ),
       ),
     );

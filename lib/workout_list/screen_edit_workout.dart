@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:workoutplanner/workout_list/models/workouts.dart';
+import 'package:workoutplanner/workout_list/screen_start_workout.dart';
 
 import 'screen_edit_workout_items.dart';
 
@@ -72,6 +73,21 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
       );
     }
 
+    Widget startButton() {
+      return Expanded(
+        child: ElevatedButton(
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => StartWorkoutScreen(
+                      workout: targetWorkout,
+                    ))),
+            style: const ButtonStyle(
+                elevation: MaterialStatePropertyAll(0),
+                shape: MaterialStatePropertyAll(
+                    BeveledRectangleBorder(borderRadius: BorderRadius.zero))),
+            child: const Text("Start Workout")),
+      );
+    }
+
     Widget cancelButton() {
       return Expanded(
         child: ElevatedButton(
@@ -91,6 +107,19 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
         title: createNew
             ? const Text("New Workout")
             : Text("Editing ${targetWorkout.name}"),
+        actions: [
+          createNew
+              ? Container()
+              : IconButton(
+                  onPressed: () => setState(() {
+                    editing = !editing;
+                  }),
+                  icon: Icon(
+                    Icons.edit,
+                    color: editing ? Colors.black : Colors.white,
+                  ),
+                )
+        ],
       ),
       bottomNavigationBar: BottomAppBar(
           height: 50,
@@ -98,8 +127,8 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              cancelButton(),
-              submitButton(),
+              editing ? cancelButton() : Container(),
+              editing ? submitButton() : startButton(),
             ],
           )),
       body: Form(
@@ -124,18 +153,20 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
       child: ListView(
         children: [
           listbuilder(),
-          ListTile(
-              onTap: () => Navigator.of(context)
-                      .push(MaterialPageRoute(
-                          builder: (_) => const WorkoutItemEditScreen()))
-                      .then((value) {
-                    if (value.runtimeType == WorkoutItem) {
-                      setState(() {
-                        workoutItemList.add(value);
-                      });
-                    }
-                  }),
-              title: const Icon(Icons.add)),
+          editing
+              ? ListTile(
+                  onTap: () => Navigator.of(context)
+                          .push(MaterialPageRoute(
+                              builder: (_) => const WorkoutItemEditScreen()))
+                          .then((value) {
+                        if (value.runtimeType == WorkoutItem) {
+                          setState(() {
+                            workoutItemList.add(value);
+                          });
+                        }
+                      }),
+                  title: const Icon(Icons.add))
+              : Container(),
         ],
       ),
     );
@@ -216,7 +247,7 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
         }
       }),
       // trailing: IconButton(
-      //   icon: const Icon(Icons.more_vert),
+      //   icon:  Icon(Icons.more_vert),
       //   onPressed: () => print("object"),
       // ),
     );
@@ -226,6 +257,7 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
+        enabled: editing,
         controller: _controllerTitle,
         validator: (value) {
           if (value == null || value.trim().isEmpty) {

@@ -4,14 +4,42 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:workoutplanner/exercise_list/models/exercise.dart';
 import 'package:workoutplanner/exercise_list/screen_edit_exercise.dart';
 
-class ExerciseList extends ConsumerWidget {
+class ExerciseList extends ConsumerStatefulWidget {
   const ExerciseList({super.key, this.picker = false});
   final bool picker;
 
-  // List<String> list = List<String>.generate(10000, (i) => 'Item $i')
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ExerciseList> createState() => _ExerciseListState();
+}
+
+class _ExerciseListState extends ConsumerState<ExerciseList> {
+  // List<String> list = List<String>.generate(10000, (i) => 'Item $i')
+
+  final TextEditingController _controllerSearchbar = TextEditingController();
+
+  List<Exercise> _foundList = [];
+  List<Exercise> _actualList = [];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final exerciseList = ref.watch(exerciseListNotifierProvider);
+
+    buildListView() {
+      return exerciseList.when(
+        data: (list) {
+          _actualList = list;
+          searchExercise(_controllerSearchbar.text);
+          return Expanded(child: listbuilder(_foundList));
+        },
+        loading: (() => const Center(child: CircularProgressIndicator())),
+        error: ((error, stack) => Text(error.toString())),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -37,14 +65,39 @@ class ExerciseList extends ConsumerWidget {
         ],
       ),
       // body: listbuilder(exerciseList),
-      body: exerciseList.when(
-        data: (list) {
-          return listbuilder(list);
-        },
-        loading: (() => const Center(child: CircularProgressIndicator())),
-        error: ((error, stack) => Text(error.toString())),
+      body: Column(
+        children: [
+          searchBar(),
+          buildListView(),
+        ],
       ),
     );
+  }
+
+  Widget searchBar() {
+    return TextField(
+      controller: _controllerSearchbar,
+      decoration: InputDecoration(
+          prefixIcon: const Icon(Icons.search),
+          hintText: "Exercise Name",
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(20),
+          )),
+      onChanged: (e) => searchExercise(e),
+    );
+  }
+
+  void searchExercise(String query) {
+    final suggestions = _actualList.where((element) {
+      final exerciseName = element.name.toLowerCase();
+      final input = query.toLowerCase();
+
+      return exerciseName.contains(input);
+    }).toList();
+
+    setState(() {
+      _foundList = suggestions;
+    });
   }
 
   Widget listbuilder(List<Exercise> list) {
@@ -56,7 +109,7 @@ class ExerciseList extends ConsumerWidget {
       itemBuilder: (context, index) {
         return ListTile(
           title: Text(list[index].name),
-          onTap: () => picker
+          onTap: () => widget.picker
               ? Navigator.of(context).pop(list[index])
               : Navigator.of(context).push(MaterialPageRoute(
                   builder: ((context) =>

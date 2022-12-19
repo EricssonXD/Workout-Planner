@@ -44,6 +44,22 @@ enum ExerciseRepType {
   timed,
   maxRep,
   maxTime;
+
+  @override
+  String toString() {
+    switch (this) {
+      case ExerciseRepType.reps:
+        return "Reps";
+      case ExerciseRepType.timed:
+        return "Seconds";
+      case ExerciseRepType.maxRep:
+        return "Max Reps";
+      case ExerciseRepType.maxTime:
+        return "Max Seconds";
+      default:
+        return "";
+    }
+  }
 }
 
 class WorkoutManager {
