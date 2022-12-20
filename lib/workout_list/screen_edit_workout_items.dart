@@ -50,7 +50,7 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
       ref.read(isarInstanceProvider.future).then((value) async {
         pickedExercise = await value.exercises
             .filter()
-            .nameEqualTo(targetWorkoutItem.name)
+            .idEqualTo(targetWorkoutItem.id)
             .findFirst();
         setState(() {});
       });

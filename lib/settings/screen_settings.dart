@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:workoutplanner/exercise_list/models/exercise.dart';
 import 'package:workoutplanner/utils/providers/isar.dart';
+import 'package:workoutplanner/exercise_list/models/exercise.dart';
 import 'package:workoutplanner/workout_list/models/workouts.dart';
 
 class SettingScreen extends HookConsumerWidget {

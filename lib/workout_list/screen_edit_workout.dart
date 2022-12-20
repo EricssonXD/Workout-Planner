@@ -23,6 +23,7 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
   bool editing = true;
   bool nameExists = false;
   List<WorkoutItem> workoutItemList = [];
+  bool snackBarOn = false;
 
   final TextEditingController _controllerTitle = TextEditingController();
 
@@ -76,10 +77,26 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
     Widget startButton() {
       return Expanded(
         child: ElevatedButton(
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => StartWorkoutScreen(
-                      workout: targetWorkout,
-                    ))),
+            onPressed: () {
+              if (targetWorkout.workoutItems.isEmpty) {
+                snackBarOn
+                    ? null
+                    : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: const Text("Rundown Cannot be Empty!"),
+                        behavior: SnackBarBehavior.floating,
+                        onVisible: () {
+                          snackBarOn = true;
+                          Future.delayed(const Duration(seconds: 4))
+                              .then((value) => snackBarOn = false);
+                        },
+                      ));
+                return;
+              }
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => StartWorkoutScreen(
+                        workout: targetWorkout,
+                      )));
+            },
             style: const ButtonStyle(
                 elevation: MaterialStatePropertyAll(0),
                 shape: MaterialStatePropertyAll(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:workoutplanner/home/screen_home.dart';
 
 Future main() async {
   // WidgetsFlutterBinding.ensureInitialized();
@@ -7,6 +8,7 @@ Future main() async {
 
   runApp(const ProviderScope(
       child: App())); //Wrap in provider scope for riverpod to work
+  // runApp(const Nothing()); //Wrap in provider scope for riverpod to work
 }
 
 class App extends StatelessWidget {
@@ -16,18 +18,25 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Nothing(),
+      home: Home(),
     );
   }
 }
 
-class Nothing extends ConsumerWidget {
+class Nothing extends StatelessWidget {
   const Nothing({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return const Scaffold(
-      body: Text("Nothing"),
+  Widget build(BuildContext context) {
+    return ProviderScope(
+      child: MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text("Nothing"),
+          ),
+          body: const Text("Nothing"),
+        ),
+      ),
     );
   }
 }
