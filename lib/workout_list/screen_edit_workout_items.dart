@@ -26,6 +26,7 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
   bool requireRepInput = true;
 
   late WorkoutItem targetWorkoutItem;
+  WorkoutItem? editedItem;
   Exercise? pickedExercise;
 
   final _repFormKey = GlobalKey();
@@ -39,14 +40,21 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
   @override
   void initState() {
     super.initState();
+    setFields();
+  }
+
+  void setFields() {
     if (widget.targetWorkoutItem != null) {
       targetWorkoutItem = widget.targetWorkoutItem!;
       createNew = false;
-      editing = true;
+      editing = false;
       _controllerReps.text = targetWorkoutItem.reps.toString();
       _controllerRestTime.text = targetWorkoutItem.restTime.toString();
       _controllerSets.text = targetWorkoutItem.sets.toString();
       repType = targetWorkoutItem.exerciseCountType;
+      if (repType == ExerciseRepType.reps || repType == ExerciseRepType.timed) {
+        requireRepInput = true;
+      }
       ref.read(isarInstanceProvider.future).then((value) async {
         pickedExercise = await value.exercises
             .filter()
@@ -54,13 +62,27 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
             .findFirst();
         setState(() {});
       });
+      editedItem = targetWorkoutItem;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    void exit() {
+      if (createNew && pickedExercise == null) {
+        Navigator.of(context).pop();
+      } else {
+        Navigator.of(context).pop(editedItem);
+      }
+    }
+
     void submitForm() {
       if (!_formKey.currentState!.validate()) return;
+      if (pickedExercise == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Please Pick and Exercise")));
+        return;
+      }
 
       WorkoutItem newItem = WorkoutItem()
         ..name = pickedExercise!.name
@@ -70,7 +92,10 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
         ..sets = int.parse(_controllerSets.text)
         ..restTime = int.parse(_controllerRestTime.text);
 
-      Navigator.of(context).pop(newItem);
+      editedItem = newItem;
+      setState(() {
+        editing = false;
+      });
     }
 
     Widget submitButton() {
@@ -96,43 +121,85 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
                 shape: MaterialStatePropertyAll(
                     BeveledRectangleBorder(borderRadius: BorderRadius.zero))),
             onPressed: () {
-              Navigator.of(context).pop();
+              // Navigator.of(context).pop();
+              setFields();
             },
             child: const Text("Cancel")),
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: createNew
-            ? const Text("New Workout Item")
-            : Text("Editing ${targetWorkoutItem.name}"),
-      ),
-      bottomNavigationBar: BottomAppBar(
-          height: 50,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              cancelButton(),
-              submitButton(),
-            ],
-          )),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            exercisePicker(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                requireRepInput ? repForm() : Container(),
-                repsTypeForm(),
-              ],
-            ),
-            setForm(),
-            restTimeForm(),
+    return WillPopScope(
+      onWillPop: () async {
+        exit();
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => exit(),
+          ),
+          title: createNew
+              ? const Text("New Workout Item")
+              : Text(editing
+                  ? "Editing ${targetWorkoutItem.name}"
+                  : targetWorkoutItem.name),
+          actions: [
+            createNew
+                ? Container()
+                : IconButton(
+                    onPressed: () => setState(() {
+                      if (editing) {
+                        editing = false;
+                        setFields();
+                      } else {
+                        editing = true;
+                      }
+                    }),
+                    icon: Icon(
+                      Icons.edit,
+                      color: editing ? Colors.black : Colors.white,
+                    ),
+                  )
           ],
+        ),
+        bottomNavigationBar: editing
+            ? Container(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: BottomAppBar(
+                  height: 50,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      cancelButton(),
+                      submitButton(),
+                    ],
+                  ),
+                ),
+              )
+            : null,
+        body: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              exercisePicker(),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    requireRepInput ? repForm() : Container(),
+                    repsTypeForm(),
+                  ],
+                ),
+              ),
+              setForm(),
+              restTimeForm(),
+            ],
+          ),
         ),
       ),
     );
@@ -147,7 +214,7 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
     } else {
       return ListTile(
         title: Center(child: Text("Exercise: ${pickedExercise!.name}")),
-        onTap: () => pickExercise(),
+        onTap: () => editing ? pickExercise() : null,
       );
     }
   }
@@ -186,8 +253,7 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
   }
 
   Widget repForm() {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 200),
+    return Flexible(
       child: TextFormField(
         enabled: editing,
         validator: (value) {
@@ -224,17 +290,19 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
     return DropdownButton<ExerciseRepType>(
         key: _repFormKey,
         value: repType,
-        onChanged: (ExerciseRepType? newValue) {
-          setState(() {
-            repType = newValue ?? ExerciseRepType.reps;
-            if (repType == ExerciseRepType.maxRep ||
-                repType == ExerciseRepType.maxTime) {
-              requireRepInput = false;
-            } else {
-              requireRepInput = true;
-            }
-          });
-        },
+        onChanged: editing
+            ? (ExerciseRepType? newValue) {
+                setState(() {
+                  repType = newValue ?? ExerciseRepType.reps;
+                  if (repType == ExerciseRepType.maxRep ||
+                      repType == ExerciseRepType.maxTime) {
+                    requireRepInput = false;
+                  } else {
+                    requireRepInput = true;
+                  }
+                });
+              }
+            : null,
         items: ExerciseRepType.values.map((ExerciseRepType repType) {
           return DropdownMenuItem<ExerciseRepType>(
               value: repType, child: Text(repType.toString()));

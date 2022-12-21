@@ -1,8 +1,10 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
 import 'package:workoutplanner/utils/providers/isar.dart';
 
 part 'workouts.g.dart';
@@ -37,6 +39,38 @@ class WorkoutItem {
 
   @enumerated
   ExerciseRepType exerciseCountType = ExerciseRepType.reps;
+
+  WorkoutItem from(WorkoutItem item) {
+    return this
+      ..id = item.id
+      ..name = item.name
+      ..restTime = item.restTime
+      ..reps = item.reps
+      ..sets = item.sets
+      ..exerciseCountType = item.exerciseCountType;
+  }
+
+  @override
+  bool operator ==(covariant WorkoutItem other) {
+    if (identical(this, other)) return true;
+
+    return other.id == id &&
+        other.name == name &&
+        other.restTime == restTime &&
+        other.reps == reps &&
+        other.sets == sets &&
+        other.exerciseCountType == exerciseCountType;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        name.hashCode ^
+        restTime.hashCode ^
+        reps.hashCode ^
+        sets.hashCode ^
+        exerciseCountType.hashCode;
+  }
 }
 
 enum ExerciseRepType {

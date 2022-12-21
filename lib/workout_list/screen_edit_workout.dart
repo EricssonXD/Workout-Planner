@@ -41,25 +41,6 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
 
   @override
   Widget build(BuildContext context) {
-    void submitForm() {
-      if (!_formKey.currentState!.validate()) return;
-
-      targetWorkout.name = _controllerTitle.text;
-      targetWorkout.workoutItems = workoutItemList;
-
-      ref.read(workoutManagerProvider.future).then((value) async {
-        bool succeed = await value.addWorkout(targetWorkout);
-        if (succeed) {
-          // ignore: use_build_context_synchronously
-          Navigator.of(context).pop();
-        } else {
-          nameExists = true;
-          !_formKey.currentState!.validate();
-          nameExists = false;
-        }
-      });
-    }
-
     Widget submitButton() {
       return Expanded(
         child: ElevatedButton(
@@ -113,7 +94,10 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
                 shape: MaterialStatePropertyAll(
                     BeveledRectangleBorder(borderRadius: BorderRadius.zero))),
             onPressed: () {
-              Navigator.of(context).pop();
+              // Navigator.of(context).pop();
+              setState(() {
+                editing = false;
+              });
             },
             child: const Text("Cancel")),
       );
@@ -123,7 +107,8 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
       appBar: AppBar(
         title: createNew
             ? const Text("New Workout")
-            : Text("Editing ${targetWorkout.name}"),
+            : Text(
+                editing ? "Editing ${targetWorkout.name}" : targetWorkout.name),
         actions: [
           createNew
               ? Container()
@@ -138,16 +123,21 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
                 )
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
-          height: 50,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              editing ? cancelButton() : Container(),
-              editing ? submitButton() : startButton(),
-            ],
-          )),
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: BottomAppBar(
+            height: 50,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                editing ? cancelButton() : Container(),
+                editing ? submitButton() : startButton(),
+              ],
+            )),
+      ),
       body: Form(
         key: _formKey,
         child: Column(
@@ -182,8 +172,11 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
                           });
                         }
                       }),
-                  title: const Icon(Icons.add))
-              : Container(),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [Icon(Icons.add), Text(" Add Item")],
+                  ))
+              : const ListTile(title: Center(child: Text("End of Rundown"))),
         ],
       ),
     );
@@ -191,6 +184,7 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
 
   Widget listbuilder() {
     return ReorderableListView.builder(
+      physics: const ScrollPhysics(),
       dragStartBehavior: DragStartBehavior.start,
       buildDefaultDragHandles: false,
       shrinkWrap: true,
@@ -210,24 +204,24 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
 
   Widget listItemBuilder(int index) {
     WorkoutItem item = workoutItemList[index];
-    return Column(
+    return ListView(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
       key: ValueKey(workoutItemList[index]),
       children: [
         Dismissible(
-          direction: DismissDirection.startToEnd,
+          direction:
+              editing ? DismissDirection.startToEnd : DismissDirection.none,
           movementDuration: const Duration(milliseconds: 200),
           key: ValueKey(workoutItemList[index]),
-          confirmDismiss: (direction) async {
-            return true;
-          },
           onDismissed: ((direction) => setState(() {
                 workoutItemList.remove(item);
               })),
           background: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            alignment: AlignmentDirectional.centerStart,
             color: Colors.red,
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: const [
                 Icon(
                   Icons.delete,
@@ -247,19 +241,28 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
   }
 
   ListTile listTileBuilder(int index) {
+    WorkoutItem item = workoutItemList[index];
     return ListTile(
-      leading: ReorderableDragStartListener(
-          index: index, child: const Icon(Icons.drag_indicator)),
-      title: Text(workoutItemList[index].name),
+      horizontalTitleGap: 0,
+      leading: editing
+          ? ReorderableDragStartListener(
+              index: index, child: const Icon(Icons.drag_indicator))
+          : null,
+      title: Text(item.name),
+      subtitle: Text(
+          "${item.reps} ${item.exerciseCountType} | ${item.sets} Sets | ${item.restTime}s Rest"),
       onTap: () => Navigator.of(context)
           .push(MaterialPageRoute(
               builder: (_) => WorkoutItemEditScreen(
-                    targetWorkoutItem: workoutItemList[index],
+                    targetWorkoutItem: item,
                   )))
           .then((value) {
         if (value.runtimeType == WorkoutItem) {
           setState(() {
-            workoutItemList[index] = value;
+            if (workoutItemList[index] != value && value is WorkoutItem) {
+              workoutItemList[index] = value;
+              submitForm();
+            }
           });
         }
       }),
@@ -290,5 +293,28 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
         ),
       ),
     );
+  }
+
+  void submitForm() {
+    print("object");
+    if (!_formKey.currentState!.validate()) return;
+
+    targetWorkout.name = _controllerTitle.text;
+    targetWorkout.workoutItems = workoutItemList;
+
+    ref.read(workoutManagerProvider.future).then((value) async {
+      bool succeed = await value.addWorkout(targetWorkout);
+      if (succeed) {
+        // ignore: use_build_context_synchronously
+        // Navigator.of(context).pop();
+        setState(() {
+          editing = false;
+        });
+      } else {
+        nameExists = true;
+        !_formKey.currentState!.validate();
+        nameExists = false;
+      }
+    });
   }
 }

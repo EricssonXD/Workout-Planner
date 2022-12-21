@@ -20,14 +20,11 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
 
   late WorkoutItem nextItem;
   late WorkoutItem currentItem;
-  WorkoutItem? previousItem;
   int currentIndex = 0;
-  int currentSet = 0;
-  int nextSet = 0;
   bool workoutFinished = false;
 
   Timer timer = Timer(const Duration(seconds: 0), () {});
-  late int timerLeft;
+  int timerLeft = 60;
   bool overTime = false;
   bool resting = false;
 
@@ -41,6 +38,7 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
     setState(() {
       timerLeft = seconds ?? timerLeft;
     });
+    stopTimer();
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         timerLeft--;
@@ -58,33 +56,24 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
   void previousTask() {
     stopTimer();
     setState(() {
+      // print("Index $currentIndex => ${currentIndex - 1}");
+      currentIndex--;
       nextItem = currentItem;
-      currentItem = previousItem ?? currentItem;
-      nextSet = currentSet;
-      currentSet--;
+      currentItem = rundown[currentIndex];
+      resting = false;
+      workoutFinished = false;
     });
   }
 
   void nextTask() {
     setState(() {
-      if (!(currentIndex == 0 && currentSet == 0)) {
-        print("object");
-        previousItem = currentItem;
-      }
       currentItem = nextItem;
-      nextSet++;
-      currentSet = nextSet;
-      if (nextSet < rundown[currentIndex].sets) {
+      // print("Index $currentIndex => ${currentIndex + 1}");
+      currentIndex++;
+      if (currentIndex < rundown.length - 1) {
+        nextItem = rundown[currentIndex + 1];
       } else {
-        if (currentIndex < rundown.length - 1) {
-          currentSet = nextSet;
-          nextSet = 0;
-          currentIndex++;
-          nextItem = rundown[currentIndex];
-        } else {
-          //Workout Finished
-          workoutFinished = true;
-        }
+        workoutFinished = true;
       }
     });
   }
@@ -94,10 +83,29 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
     super.initState();
 
     workout = widget.workout;
-    rundown = workout.workoutItems;
-    nextItem = rundown[currentIndex];
-    currentItem = nextItem;
-    nextTask();
+
+    List<WorkoutItem> tempList = [];
+    for (int i = 0; i < workout.workoutItems.length; i++) {
+      for (int j = 0; j < workout.workoutItems[i].sets; j++) {
+        WorkoutItem item = WorkoutItem().from(workout.workoutItems[i]);
+        item.sets = j + 1;
+        tempList.add(item);
+      }
+    }
+
+    rundown = tempList;
+    currentItem = rundown[0];
+
+    if (currentItem.exerciseCountType == ExerciseRepType.timed) {
+      startTimer(currentItem.reps);
+    }
+
+    if (rundown.length != 1) {
+      nextItem = rundown[1];
+    } else {
+      nextItem = currentItem;
+      workoutFinished = true;
+    }
   }
 
   @override
@@ -135,15 +143,25 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
   }
 
   Widget exerciseProgress() {
-    return Expanded(
-      child: Align(
-        alignment: Alignment.center,
-        child: Text(
-          "${currentItem.reps} Reps",
-          style: const TextStyle(fontSize: 80),
-        ),
-      ),
-    );
+    switch (currentItem.exerciseCountType) {
+      case ExerciseRepType.reps:
+        return Expanded(
+          child: Align(
+            alignment: Alignment.center,
+            child: Text(
+              "${currentItem.reps} Reps",
+              style: const TextStyle(fontSize: 80),
+            ),
+          ),
+        );
+      case ExerciseRepType.timed:
+        if (!timer.isActive) {
+          startTimer(currentItem.reps);
+        }
+        return timerWidget();
+      default:
+        return Container();
+    }
   }
 
   Widget timerWidget() {
@@ -163,7 +181,9 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
       padding: const EdgeInsets.all(8.0),
       child: Center(
         child: Text(
-            "Current Exercise: ${currentItem.name} Set ${currentSet.toString()}",
+            resting
+                ? "Rest Time"
+                : "Current Exercise: ${currentItem.name} Set ${currentItem.sets.toString()}",
             style: const TextStyle(fontSize: 20)),
       ),
     );
@@ -213,7 +233,7 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
   }
 
   Widget previousButton() {
-    if (previousItem == null || currentSet == 1) {
+    if (currentIndex == 0) {
       return Container();
     }
     return Expanded(

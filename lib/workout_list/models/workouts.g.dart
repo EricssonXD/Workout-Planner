@@ -1191,28 +1191,33 @@ const WorkoutItemSchema = Schema(
       type: IsarType.byte,
       enumMap: _WorkoutItemexerciseCountTypeEnumValueMap,
     ),
-    r'id': PropertySchema(
+    r'hashCode': PropertySchema(
       id: 1,
+      name: r'hashCode',
+      type: IsarType.long,
+    ),
+    r'id': PropertySchema(
+      id: 2,
       name: r'id',
       type: IsarType.long,
     ),
     r'name': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'name',
       type: IsarType.string,
     ),
     r'reps': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'reps',
       type: IsarType.int,
     ),
     r'restTime': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'restTime',
       type: IsarType.int,
     ),
     r'sets': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'sets',
       type: IsarType.int,
     )
@@ -1240,11 +1245,12 @@ void _workoutItemSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeByte(offsets[0], object.exerciseCountType.index);
-  writer.writeLong(offsets[1], object.id);
-  writer.writeString(offsets[2], object.name);
-  writer.writeInt(offsets[3], object.reps);
-  writer.writeInt(offsets[4], object.restTime);
-  writer.writeInt(offsets[5], object.sets);
+  writer.writeLong(offsets[1], object.hashCode);
+  writer.writeLong(offsets[2], object.id);
+  writer.writeString(offsets[3], object.name);
+  writer.writeInt(offsets[4], object.reps);
+  writer.writeInt(offsets[5], object.restTime);
+  writer.writeInt(offsets[6], object.sets);
 }
 
 WorkoutItem _workoutItemDeserialize(
@@ -1257,11 +1263,11 @@ WorkoutItem _workoutItemDeserialize(
   object.exerciseCountType = _WorkoutItemexerciseCountTypeValueEnumMap[
           reader.readByteOrNull(offsets[0])] ??
       ExerciseRepType.reps;
-  object.id = reader.readLong(offsets[1]);
-  object.name = reader.readString(offsets[2]);
-  object.reps = reader.readInt(offsets[3]);
-  object.restTime = reader.readInt(offsets[4]);
-  object.sets = reader.readInt(offsets[5]);
+  object.id = reader.readLong(offsets[2]);
+  object.name = reader.readString(offsets[3]);
+  object.reps = reader.readInt(offsets[4]);
+  object.restTime = reader.readInt(offsets[5]);
+  object.sets = reader.readInt(offsets[6]);
   return object;
 }
 
@@ -1279,12 +1285,14 @@ P _workoutItemDeserializeProp<P>(
     case 1:
       return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 3:
-      return (reader.readInt(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 4:
       return (reader.readInt(offset)) as P;
     case 5:
+      return (reader.readInt(offset)) as P;
+    case 6:
       return (reader.readInt(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1354,6 +1362,61 @@ extension WorkoutItemQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'exerciseCountType',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutItem, WorkoutItem, QAfterFilterCondition> hashCodeEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutItem, WorkoutItem, QAfterFilterCondition>
+      hashCodeGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutItem, WorkoutItem, QAfterFilterCondition>
+      hashCodeLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<WorkoutItem, WorkoutItem, QAfterFilterCondition> hashCodeBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hashCode',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
