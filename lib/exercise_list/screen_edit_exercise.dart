@@ -13,7 +13,7 @@ class ExerciseEditScreen extends ConsumerStatefulWidget {
 }
 
 class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
-  late Exercise? targetExercise;
+  Exercise targetExercise = Exercise();
 
   final _formKey = GlobalKey<FormState>();
   bool createNew = true;
@@ -28,14 +28,18 @@ class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
   @override
   void initState() {
     super.initState();
-    targetExercise = widget.targetExercise;
-    if (targetExercise != null) {
+    setFields();
+  }
+
+  void setFields() {
+    if (widget.targetExercise != null) {
+      targetExercise = widget.targetExercise!;
       createNew = false;
       editing = false;
-      _controllerTitle.text = targetExercise!.name;
-      _controllerReps.text = targetExercise!.defaultReps.toString();
-      _controllerSets.text = targetExercise!.defaultSets.toString();
-      _controllerRestTime.text = targetExercise!.defaultRestTime.toString();
+      _controllerTitle.text = targetExercise.name;
+      _controllerReps.text = targetExercise.defaultReps.toString();
+      _controllerSets.text = targetExercise.defaultSets.toString();
+      _controllerRestTime.text = targetExercise.defaultRestTime.toString();
     }
   }
 
@@ -49,21 +53,34 @@ class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
         ..name = _controllerTitle.text
         ..defaultReps = int.parse(_controllerReps.text)
         ..defaultSets = int.parse(_controllerSets.text);
-      if (targetExercise != null) {
-        newExercise.id = targetExercise!.id;
-      }
+      newExercise.id = targetExercise.id;
 
       ref.read(exerciseManagerProvider.future).then((value) async {
         bool succeed = await value.addExercise(newExercise);
         if (succeed) {
           // ignore: use_build_context_synchronously
-          Navigator.of(context).pop();
+          // Navigator.of(context).pop();
+          setState(() {
+            editing = false;
+          });
         } else {
           nameExists = true;
           !_formKey.currentState!.validate();
           nameExists = false;
         }
       });
+    }
+
+    Widget backButton() {
+      return ElevatedButton(
+          style: const ButtonStyle(
+              elevation: MaterialStatePropertyAll(0),
+              shape: MaterialStatePropertyAll(
+                  BeveledRectangleBorder(borderRadius: BorderRadius.zero))),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text("Back"));
     }
 
     Widget submitButton() {
@@ -76,7 +93,7 @@ class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
                 elevation: MaterialStatePropertyAll(0),
                 shape: MaterialStatePropertyAll(
                     BeveledRectangleBorder(borderRadius: BorderRadius.zero))),
-            child: const Text("Done")),
+            child: const Text("Save")),
       );
     }
 
@@ -88,7 +105,10 @@ class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
                 shape: MaterialStatePropertyAll(
                     BeveledRectangleBorder(borderRadius: BorderRadius.zero))),
             onPressed: () {
-              Navigator.of(context).pop();
+              setFields();
+              setState(() {
+                editing = false;
+              });
             },
             child: const Text("Cancel")),
       );
@@ -99,17 +119,25 @@ class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            createNew ? Navigator.of(context).pop() : submitForm();
+            Navigator.of(context).pop();
           },
         ),
-        title: Text(
-            "Editing ${targetExercise?.name.toString() ?? "New Exercise"}"),
+        title: Text(createNew
+            ? "New Exercise"
+            : (editing
+                ? "Editing ${targetExercise.name.toString()}"
+                : targetExercise.name.toString())),
         actions: [
           createNew
               ? Container()
               : IconButton(
                   onPressed: () => setState(() {
-                    editing = !editing;
+                    if (editing) {
+                      setFields();
+                      editing = false;
+                    } else {
+                      editing = true;
+                    }
                   }),
                   icon: Icon(
                     Icons.edit,
@@ -118,16 +146,24 @@ class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
                 )
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
+      bottomNavigationBar: Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: BottomAppBar(
           height: 50,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              cancelButton(),
-              submitButton(),
-            ],
-          )),
+          child: editing
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    cancelButton(),
+                    submitButton(),
+                  ],
+                )
+              : backButton(),
+        ),
+      ),
       body: Form(
         key: _formKey,
         child: Column(children: [

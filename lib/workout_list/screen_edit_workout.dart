@@ -26,16 +26,25 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
   bool snackBarOn = false;
 
   final TextEditingController _controllerTitle = TextEditingController();
+  int currentUid = 0;
 
   @override
   void initState() {
     super.initState();
+    setFields();
+  }
+
+  void setFields() {
     if (widget.targetWorkout != null) {
       targetWorkout = widget.targetWorkout!;
       createNew = false;
       editing = false;
       workoutItemList = targetWorkout.workoutItems.toList();
       _controllerTitle.text = targetWorkout.name;
+      for (int i = 0; i < workoutItemList.length; i++) {
+        workoutItemList[i].uid = i;
+        currentUid++;
+      }
     }
   }
 
@@ -51,7 +60,7 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
                 elevation: MaterialStatePropertyAll(0),
                 shape: MaterialStatePropertyAll(
                     BeveledRectangleBorder(borderRadius: BorderRadius.zero))),
-            child: const Text("Done")),
+            child: const Text("Save")),
       );
     }
 
@@ -96,6 +105,7 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
             onPressed: () {
               // Navigator.of(context).pop();
               setState(() {
+                setFields();
                 editing = false;
               });
             },
@@ -114,7 +124,12 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
               ? Container()
               : IconButton(
                   onPressed: () => setState(() {
-                    editing = !editing;
+                    if (editing) {
+                      editing = false;
+                      setFields();
+                    } else {
+                      editing = true;
+                    }
                   }),
                   icon: Icon(
                     Icons.edit,
@@ -148,7 +163,7 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
               child: Text("Workout Rundown"),
             ),
             const Divider(),
-            workoutRundown(),
+            listbuilder(),
           ],
         ),
       ),
@@ -160,93 +175,114 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
       child: ListView(
         children: [
           listbuilder(),
-          editing
-              ? ListTile(
-                  onTap: () => Navigator.of(context)
-                          .push(MaterialPageRoute(
-                              builder: (_) => const WorkoutItemEditScreen()))
-                          .then((value) {
-                        if (value.runtimeType == WorkoutItem) {
-                          setState(() {
-                            workoutItemList.add(value);
-                          });
-                        }
-                      }),
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [Icon(Icons.add), Text(" Add Item")],
-                  ))
-              : const ListTile(title: Center(child: Text("End of Rundown"))),
         ],
       ),
     );
   }
 
   Widget listbuilder() {
-    return ReorderableListView.builder(
-      physics: const ScrollPhysics(),
-      dragStartBehavior: DragStartBehavior.start,
-      buildDefaultDragHandles: false,
-      shrinkWrap: true,
-      itemCount: workoutItemList.length,
-      prototypeItem: const ListTile(
-        title: Text("list.first.name"),
+    return Expanded(
+      child: ReorderableListView.builder(
+        physics: const ScrollPhysics(),
+        dragStartBehavior: DragStartBehavior.start,
+        buildDefaultDragHandles: false,
+        itemCount: workoutItemList.length,
+        // prototypeItem: const Dismissible(
+        //   key: ValueKey("Prototype"),
+        //   child: ListTile(
+        //     title: Text("list.first.name"),
+        //     subtitle: Text("abc"),
+        //   ),
+        // ),
+        itemBuilder: (context, index) {
+          return listItemBuilder(index);
+        },
+        onReorder: (int oldIndex, int newIndex) {
+          newIndex = newIndex > oldIndex ? newIndex - 1 : newIndex;
+          workoutItemList.insert(newIndex, workoutItemList.removeAt(oldIndex));
+        },
+        footer: editing
+            ? ListTile(
+                onTap: () => Navigator.of(context)
+                        .push(MaterialPageRoute(
+                            builder: (_) => const WorkoutItemEditScreen()))
+                        .then((value) {
+                      if (value.runtimeType == WorkoutItem) {
+                        setState(() {
+                          value.uid = currentUid;
+                          currentUid++;
+                          workoutItemList.add(value);
+                          submitForm();
+                        });
+                      }
+                    }),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [Icon(Icons.add), Text(" Add Item")],
+                ))
+            : const ListTile(title: Center(child: Text("End of Rundown"))),
       ),
-      itemBuilder: (context, index) {
-        return listItemBuilder(index);
-      },
-      onReorder: (int oldIndex, int newIndex) {
-        newIndex = newIndex > oldIndex ? newIndex - 1 : newIndex;
-        workoutItemList.insert(newIndex, workoutItemList.removeAt(oldIndex));
-      },
     );
   }
 
   Widget listItemBuilder(int index) {
     WorkoutItem item = workoutItemList[index];
-    return ListView(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      key: ValueKey(workoutItemList[index]),
-      children: [
-        Dismissible(
-          direction:
-              editing ? DismissDirection.startToEnd : DismissDirection.none,
-          movementDuration: const Duration(milliseconds: 200),
-          key: ValueKey(workoutItemList[index]),
-          onDismissed: ((direction) => setState(() {
-                workoutItemList.remove(item);
-              })),
-          background: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            color: Colors.red,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: const [
-                Icon(
-                  Icons.delete,
-                  color: Colors.white,
-                ),
-                Text(
-                  "Delete",
-                  style: TextStyle(color: Colors.white),
-                )
-              ],
+
+    return Dismissible(
+      direction: editing ? DismissDirection.startToEnd : DismissDirection.none,
+      movementDuration: const Duration(milliseconds: 200),
+      key: ValueKey(index),
+      onDismissed: (direction) => setState(() {
+        workoutItemList.remove(item);
+      }),
+      background: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        color: Colors.red,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: const [
+            Icon(
+              Icons.delete,
+              color: Colors.white,
             ),
-          ),
-          child: listTileBuilder(index),
+            Text(
+              "Delete",
+              style: TextStyle(color: Colors.white),
+            )
+          ],
         ),
-      ],
+      ),
+      child: listTileBuilder(index),
     );
   }
 
-  ListTile listTileBuilder(int index) {
+  Widget listTileBuilder(int index) {
     WorkoutItem item = workoutItemList[index];
     return ListTile(
       horizontalTitleGap: 0,
       leading: editing
           ? ReorderableDragStartListener(
-              index: index, child: const Icon(Icons.drag_indicator))
+              index: index,
+              enabled: true,
+              child: const Padding(
+                padding: EdgeInsets.only(right: 8.0, bottom: 8.0, top: 8.0),
+                child: Icon(Icons.drag_indicator),
+              ),
+            )
+          : null,
+      trailing: editing
+          ? IconButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  isDismissible: true,
+                  enableDrag: true,
+                  context: context,
+                  builder: (context) {
+                    return moreOptions(item);
+                  },
+                );
+              },
+              icon: const Icon(Icons.more_vert))
           : null,
       title: Text(item.name),
       subtitle: Text(
@@ -296,7 +332,6 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
   }
 
   void submitForm() {
-    print("object");
     if (!_formKey.currentState!.validate()) return;
 
     targetWorkout.name = _controllerTitle.text;
@@ -316,5 +351,35 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
         nameExists = false;
       }
     });
+  }
+
+  Widget moreOptions(WorkoutItem item) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ListTile(
+            onTap: () => Navigator.of(context)
+                    .push(MaterialPageRoute(
+                        builder: (_) => const WorkoutItemEditScreen()))
+                    .then((value) {
+                  if (value.runtimeType == WorkoutItem) {
+                    setState(() {
+                      value.uid = currentUid;
+                      currentUid++;
+                      workoutItemList.insert(
+                          workoutItemList.indexOf(item) + 1, value);
+                      submitForm();
+                    });
+                  }
+                }),
+            title: const Center(child: Text("Insert New Exercise"))),
+        ListTile(
+            onTap: () => setState(() {
+                  workoutItemList.remove(item);
+                  Navigator.of(context).pop();
+                }),
+            title: const Center(child: Text("Delete"))),
+      ],
+    );
   }
 }

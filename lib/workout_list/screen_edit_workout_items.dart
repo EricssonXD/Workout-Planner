@@ -109,7 +109,7 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
               shape: MaterialStatePropertyAll(
                   BeveledRectangleBorder(borderRadius: BorderRadius.zero)),
             ),
-            child: const Text("Done")),
+            child: const Text("Save")),
       );
     }
 

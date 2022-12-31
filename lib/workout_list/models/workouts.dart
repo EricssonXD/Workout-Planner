@@ -31,6 +31,9 @@ class WorkoutItem {
 
   late String name;
 
+  @ignore
+  short uid = 0;
+
   short restTime = 0;
 
   short reps = 0;
@@ -44,6 +47,7 @@ class WorkoutItem {
     return this
       ..id = item.id
       ..name = item.name
+      ..uid = item.uid
       ..restTime = item.restTime
       ..reps = item.reps
       ..sets = item.sets
@@ -56,6 +60,7 @@ class WorkoutItem {
 
     return other.id == id &&
         other.name == name &&
+        other.uid == uid &&
         other.restTime == restTime &&
         other.reps == reps &&
         other.sets == sets &&
@@ -66,6 +71,7 @@ class WorkoutItem {
   int get hashCode {
     return id.hashCode ^
         name.hashCode ^
+        uid.hashCode ^
         restTime.hashCode ^
         reps.hashCode ^
         sets.hashCode ^

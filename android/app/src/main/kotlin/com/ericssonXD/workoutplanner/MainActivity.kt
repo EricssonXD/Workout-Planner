@@ -1,4 +1,4 @@
-package com.example.workoutplanner
+package com.ericssonXD.workoutplanner
 
 import io.flutter.embedding.android.FlutterActivity
 

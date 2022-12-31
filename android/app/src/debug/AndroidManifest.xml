@@ -1,5 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.workoutplanner">
+    package="com.ericssonXD.workoutplanner"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application
+        tools:replace="label"
+        android:label="Debug Workout Planner">
+    </application>
     <!-- The INTERNET permission is required for development. Specifically,
          the Flutter tool needs it to communicate with the running application
          to allow setting breakpoints, to provide hot reload, etc.

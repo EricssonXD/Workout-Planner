@@ -75,15 +75,17 @@ class _ExerciseListState extends ConsumerState<ExerciseList> {
   }
 
   Widget searchBar() {
-    return TextField(
-      controller: _controllerSearchbar,
-      decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.search),
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: TextField(
+        controller: _controllerSearchbar,
+        decoration: const InputDecoration(
+          prefixIcon: Icon(Icons.search),
           hintText: "Exercise Name",
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(20),
-          )),
-      onChanged: (e) => searchExercise(e),
+          border: InputBorder.none,
+        ),
+        onChanged: (e) => searchExercise(e),
+      ),
     );
   }
 

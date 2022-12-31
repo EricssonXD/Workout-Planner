@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:workoutplanner/exercise_list/screen_exercise_list.dart';
 import 'package:workoutplanner/settings/screen_settings.dart';
@@ -13,7 +14,7 @@ class Home extends StatelessWidget {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
@@ -42,20 +43,21 @@ class Home extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const TestScreen(),
+            if (kDebugMode)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const TestScreen(),
+                    ),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text("Test"),
                   ),
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text("Test"),
-                ),
               ),
-            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
