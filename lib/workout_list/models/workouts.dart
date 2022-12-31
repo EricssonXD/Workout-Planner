@@ -34,6 +34,9 @@ class WorkoutItem {
   @ignore
   short uid = 0;
 
+  @ignore
+  bool exerciseNotExist = false;
+
   short restTime = 0;
 
   short reps = 0;

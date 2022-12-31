@@ -295,8 +295,10 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
               stopTimer();
               nextTask();
               resting = false;
-            } else {
+            } else if (currentItem.restTime > 0) {
               rest(currentItem.restTime);
+            } else {
+              nextTask();
             }
           },
           child: Text(resting

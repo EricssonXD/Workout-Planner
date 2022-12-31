@@ -1,6 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:isar/isar.dart';
+import 'package:workoutplanner/exercise_list/models/exercise.dart';
+import 'package:workoutplanner/utils/providers/isar.dart';
 import 'package:workoutplanner/workout_list/models/workouts.dart';
 import 'package:workoutplanner/workout_list/screen_start_workout.dart';
 
@@ -31,20 +34,64 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
   @override
   void initState() {
     super.initState();
-    setFields();
+    resetFields();
+    fetchExerciseInfo();
   }
 
-  void setFields() {
+  @override
+  void dispose() {
+    _controllerTitle.dispose();
+    super.dispose();
+  }
+
+  void fetchExerciseInfo() async {
+    final Isar isar = await ref.read(isarInstanceProvider.future);
+
+    for (int i = 0; i < workoutItemList.length; i++) {
+      debugPrint(i.toString());
+      Exercise? item = await isar.exercises
+          .filter()
+          .idEqualTo(workoutItemList[i].id)
+          .findFirst();
+      if (item != null) {
+        if (workoutItemList[i].name != item.name) {
+          debugPrint("Gave Name");
+          workoutItemList[i].name = item.name;
+          submitForm();
+        }
+      } else {
+        debugPrint("noID");
+        item = await isar.exercises
+            .filter()
+            .nameEqualTo(workoutItemList[i].name)
+            .findFirst();
+        if (item != null) {
+          workoutItemList[i].id = item.id;
+          submitForm();
+          debugPrint("Gave New id");
+        } else {
+          workoutItemList[i].exerciseNotExist = true;
+          debugPrint("Exercise Not Found");
+        }
+      }
+    }
+  }
+
+  void resetFields() {
     if (widget.targetWorkout != null) {
       targetWorkout = widget.targetWorkout!;
       createNew = false;
       editing = false;
-      workoutItemList = targetWorkout.workoutItems.toList();
-      _controllerTitle.text = targetWorkout.name;
-      for (int i = 0; i < workoutItemList.length; i++) {
-        workoutItemList[i].uid = i;
-        currentUid++;
-      }
+      setFields();
+    }
+  }
+
+  void setFields() {
+    workoutItemList = targetWorkout.workoutItems.toList();
+    _controllerTitle.text = targetWorkout.name;
+    for (int i = 0; i < workoutItemList.length; i++) {
+      workoutItemList[i].uid = i;
+      currentUid++;
     }
   }
 
@@ -105,7 +152,7 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
             onPressed: () {
               // Navigator.of(context).pop();
               setState(() {
-                setFields();
+                resetFields();
                 editing = false;
               });
             },
@@ -113,58 +160,70 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: createNew
-            ? const Text("New Workout")
-            : Text(
-                editing ? "Editing ${targetWorkout.name}" : targetWorkout.name),
-        actions: [
-          createNew
-              ? Container()
-              : IconButton(
-                  onPressed: () => setState(() {
-                    if (editing) {
-                      editing = false;
-                      setFields();
-                    } else {
-                      editing = true;
-                    }
-                  }),
-                  icon: Icon(
-                    Icons.edit,
-                    color: editing ? Colors.black : Colors.white,
-                  ),
-                )
-        ],
-      ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: BottomAppBar(
-            height: 50,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                editing ? cancelButton() : Container(),
-                editing ? submitButton() : startButton(),
-              ],
-            )),
-      ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            titleForm(),
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text("Workout Rundown"),
-            ),
-            const Divider(),
-            listbuilder(),
+    return WillPopScope(
+      onWillPop: () async {
+        if (!editing) {
+          return true;
+        }
+        return await showConfirmDiscardDialog(context) ?? false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: createNew
+              ? const Text("New Workout")
+              : Text(editing
+                  ? "Editing ${targetWorkout.name}"
+                  : targetWorkout.name),
+          actions: [
+            createNew
+                ? Container()
+                : IconButton(
+                    onPressed: () => setState(() {
+                      if (editing) {
+                        editing = false;
+                        setFields();
+                      } else {
+                        editing = true;
+                      }
+                    }),
+                    icon: Icon(
+                      Icons.edit,
+                      color: editing ? Colors.black : Colors.white,
+                    ),
+                  )
           ],
+        ),
+        bottomNavigationBar: Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: BottomAppBar(
+              height: 50,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  editing ? cancelButton() : Container(),
+                  editing ? submitButton() : startButton(),
+                ],
+              )),
+        ),
+        body: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              titleForm(),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "Workout Rundown",
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              const Divider(),
+              listbuilder(),
+            ],
+          ),
         ),
       ),
     );
@@ -231,7 +290,7 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
     return Dismissible(
       direction: editing ? DismissDirection.startToEnd : DismissDirection.none,
       movementDuration: const Duration(milliseconds: 200),
-      key: ValueKey(index),
+      key: ValueKey(item),
       onDismissed: (direction) => setState(() {
         workoutItemList.remove(item);
       }),
@@ -358,20 +417,23 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
-            onTap: () => Navigator.of(context)
-                    .push(MaterialPageRoute(
-                        builder: (_) => const WorkoutItemEditScreen()))
-                    .then((value) {
-                  if (value.runtimeType == WorkoutItem) {
-                    setState(() {
-                      value.uid = currentUid;
-                      currentUid++;
-                      workoutItemList.insert(
-                          workoutItemList.indexOf(item) + 1, value);
-                      submitForm();
-                    });
-                  }
-                }),
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.of(context)
+                  .push(MaterialPageRoute(
+                      builder: (_) => const WorkoutItemEditScreen()))
+                  .then((value) {
+                if (value.runtimeType == WorkoutItem) {
+                  setState(() {
+                    value.uid = currentUid;
+                    currentUid++;
+                    workoutItemList.insert(
+                        workoutItemList.indexOf(item) + 1, value);
+                    submitForm();
+                  });
+                }
+              });
+            },
             title: const Center(child: Text("Insert New Exercise"))),
         ListTile(
             onTap: () => setState(() {
@@ -380,6 +442,36 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
                 }),
             title: const Center(child: Text("Delete"))),
       ],
+    );
+  }
+
+  Future<bool?> showConfirmDiscardDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Save Changes?"),
+          actions: [
+            TextButton(
+              child: Text(
+                "No",
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+            TextButton(
+              child: Text(
+                "Yes",
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+                submitForm();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -79,8 +79,9 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
     void submitForm() {
       if (!_formKey.currentState!.validate()) return;
       if (pickedExercise == null) {
+        ScaffoldMessenger.of(context).removeCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Please Pick and Exercise")));
+            const SnackBar(content: Text("Please pick an Exercise")));
         return;
       }
 
@@ -128,6 +129,18 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
       );
     }
 
+    Widget backButton() {
+      return ElevatedButton(
+          style: const ButtonStyle(
+              elevation: MaterialStatePropertyAll(0),
+              shape: MaterialStatePropertyAll(
+                  BeveledRectangleBorder(borderRadius: BorderRadius.zero))),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text("Back"));
+    }
+
     return WillPopScope(
       onWillPop: () async {
         exit();
@@ -163,24 +176,24 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
                   )
           ],
         ),
-        bottomNavigationBar: editing
-            ? Container(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: BottomAppBar(
-                  height: 50,
-                  child: Row(
+        bottomNavigationBar: Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: BottomAppBar(
+            height: 50,
+            child: editing
+                ? Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       cancelButton(),
                       submitButton(),
                     ],
-                  ),
-                ),
-              )
-            : null,
+                  )
+                : backButton(),
+          ),
+        ),
         body: Form(
           key: _formKey,
           child: Column(

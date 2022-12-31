@@ -17,53 +17,33 @@ const ExerciseSchema = CollectionSchema(
   name: r'Exercise',
   id: 2972066467915231902,
   properties: {
-    r'defaultReps': PropertySchema(
-      id: 0,
-      name: r'defaultReps',
-      type: IsarType.long,
-    ),
-    r'defaultRestTime': PropertySchema(
-      id: 1,
-      name: r'defaultRestTime',
-      type: IsarType.long,
-    ),
-    r'defaultSets': PropertySchema(
-      id: 2,
-      name: r'defaultSets',
-      type: IsarType.long,
-    ),
     r'isLocalVideo': PropertySchema(
-      id: 3,
+      id: 0,
       name: r'isLocalVideo',
       type: IsarType.bool,
     ),
-    r'isTimedExercise': PropertySchema(
-      id: 4,
-      name: r'isTimedExercise',
-      type: IsarType.bool,
-    ),
     r'name': PropertySchema(
-      id: 5,
+      id: 1,
       name: r'name',
       type: IsarType.string,
     ),
     r'tags': PropertySchema(
-      id: 6,
+      id: 2,
       name: r'tags',
       type: IsarType.stringList,
     ),
     r'thumbnailPath': PropertySchema(
-      id: 7,
+      id: 3,
       name: r'thumbnailPath',
       type: IsarType.string,
     ),
     r'videoLink': PropertySchema(
-      id: 8,
+      id: 4,
       name: r'videoLink',
       type: IsarType.string,
     ),
     r'videoPath': PropertySchema(
-      id: 9,
+      id: 5,
       name: r'videoPath',
       type: IsarType.string,
     )
@@ -122,16 +102,12 @@ void _exerciseSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeLong(offsets[0], object.defaultReps);
-  writer.writeLong(offsets[1], object.defaultRestTime);
-  writer.writeLong(offsets[2], object.defaultSets);
-  writer.writeBool(offsets[3], object.isLocalVideo);
-  writer.writeBool(offsets[4], object.isTimedExercise);
-  writer.writeString(offsets[5], object.name);
-  writer.writeStringList(offsets[6], object.tags);
-  writer.writeString(offsets[7], object.thumbnailPath);
-  writer.writeString(offsets[8], object.videoLink);
-  writer.writeString(offsets[9], object.videoPath);
+  writer.writeBool(offsets[0], object.isLocalVideo);
+  writer.writeString(offsets[1], object.name);
+  writer.writeStringList(offsets[2], object.tags);
+  writer.writeString(offsets[3], object.thumbnailPath);
+  writer.writeString(offsets[4], object.videoLink);
+  writer.writeString(offsets[5], object.videoPath);
 }
 
 Exercise _exerciseDeserialize(
@@ -141,17 +117,13 @@ Exercise _exerciseDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Exercise();
-  object.defaultReps = reader.readLong(offsets[0]);
-  object.defaultRestTime = reader.readLong(offsets[1]);
-  object.defaultSets = reader.readLong(offsets[2]);
   object.id = id;
-  object.isLocalVideo = reader.readBool(offsets[3]);
-  object.isTimedExercise = reader.readBool(offsets[4]);
-  object.name = reader.readString(offsets[5]);
-  object.tags = reader.readStringList(offsets[6]) ?? [];
-  object.thumbnailPath = reader.readString(offsets[7]);
-  object.videoLink = reader.readString(offsets[8]);
-  object.videoPath = reader.readString(offsets[9]);
+  object.isLocalVideo = reader.readBool(offsets[0]);
+  object.name = reader.readString(offsets[1]);
+  object.tags = reader.readStringList(offsets[2]) ?? [];
+  object.thumbnailPath = reader.readString(offsets[3]);
+  object.videoLink = reader.readString(offsets[4]);
+  object.videoPath = reader.readString(offsets[5]);
   return object;
 }
 
@@ -163,24 +135,16 @@ P _exerciseDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readLong(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 1:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readLong(offset)) as P;
-    case 3:
-      return (reader.readBool(offset)) as P;
-    case 4:
-      return (reader.readBool(offset)) as P;
-    case 5:
-      return (reader.readString(offset)) as P;
-    case 6:
       return (reader.readStringList(offset) ?? []) as P;
-    case 7:
+    case 3:
       return (reader.readString(offset)) as P;
-    case 8:
+    case 4:
       return (reader.readString(offset)) as P;
-    case 9:
+    case 5:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -473,170 +437,6 @@ extension ExerciseQueryWhere on QueryBuilder<Exercise, Exercise, QWhereClause> {
 
 extension ExerciseQueryFilter
     on QueryBuilder<Exercise, Exercise, QFilterCondition> {
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> defaultRepsEqualTo(
-      int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'defaultReps',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
-      defaultRepsGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'defaultReps',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> defaultRepsLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'defaultReps',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> defaultRepsBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'defaultReps',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
-      defaultRestTimeEqualTo(int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'defaultRestTime',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
-      defaultRestTimeGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'defaultRestTime',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
-      defaultRestTimeLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'defaultRestTime',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
-      defaultRestTimeBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'defaultRestTime',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> defaultSetsEqualTo(
-      int value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'defaultSets',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
-      defaultSetsGreaterThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'defaultSets',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> defaultSetsLessThan(
-    int value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'defaultSets',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition> defaultSetsBetween(
-    int lower,
-    int upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'defaultSets',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
   QueryBuilder<Exercise, Exercise, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -694,16 +494,6 @@ extension ExerciseQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'isLocalVideo',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterFilterCondition>
-      isTimedExerciseEqualTo(bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isTimedExercise',
         value: value,
       ));
     });
@@ -1459,42 +1249,6 @@ extension ExerciseQueryLinks
     on QueryBuilder<Exercise, Exercise, QFilterCondition> {}
 
 extension ExerciseQuerySortBy on QueryBuilder<Exercise, Exercise, QSortBy> {
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByDefaultReps() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'defaultReps', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByDefaultRepsDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'defaultReps', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByDefaultRestTime() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'defaultRestTime', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByDefaultRestTimeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'defaultRestTime', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByDefaultSets() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'defaultSets', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByDefaultSetsDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'defaultSets', Sort.desc);
-    });
-  }
-
   QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByIsLocalVideo() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isLocalVideo', Sort.asc);
@@ -1504,18 +1258,6 @@ extension ExerciseQuerySortBy on QueryBuilder<Exercise, Exercise, QSortBy> {
   QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByIsLocalVideoDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isLocalVideo', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByIsTimedExercise() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isTimedExercise', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> sortByIsTimedExerciseDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isTimedExercise', Sort.desc);
     });
   }
 
@@ -1570,42 +1312,6 @@ extension ExerciseQuerySortBy on QueryBuilder<Exercise, Exercise, QSortBy> {
 
 extension ExerciseQuerySortThenBy
     on QueryBuilder<Exercise, Exercise, QSortThenBy> {
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByDefaultReps() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'defaultReps', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByDefaultRepsDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'defaultReps', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByDefaultRestTime() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'defaultRestTime', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByDefaultRestTimeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'defaultRestTime', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByDefaultSets() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'defaultSets', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByDefaultSetsDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'defaultSets', Sort.desc);
-    });
-  }
-
   QueryBuilder<Exercise, Exercise, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -1627,18 +1333,6 @@ extension ExerciseQuerySortThenBy
   QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByIsLocalVideoDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isLocalVideo', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByIsTimedExercise() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isTimedExercise', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QAfterSortBy> thenByIsTimedExerciseDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isTimedExercise', Sort.desc);
     });
   }
 
@@ -1693,33 +1387,9 @@ extension ExerciseQuerySortThenBy
 
 extension ExerciseQueryWhereDistinct
     on QueryBuilder<Exercise, Exercise, QDistinct> {
-  QueryBuilder<Exercise, Exercise, QDistinct> distinctByDefaultReps() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'defaultReps');
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QDistinct> distinctByDefaultRestTime() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'defaultRestTime');
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QDistinct> distinctByDefaultSets() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'defaultSets');
-    });
-  }
-
   QueryBuilder<Exercise, Exercise, QDistinct> distinctByIsLocalVideo() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isLocalVideo');
-    });
-  }
-
-  QueryBuilder<Exercise, Exercise, QDistinct> distinctByIsTimedExercise() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isTimedExercise');
     });
   }
 
@@ -1767,33 +1437,9 @@ extension ExerciseQueryProperty
     });
   }
 
-  QueryBuilder<Exercise, int, QQueryOperations> defaultRepsProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'defaultReps');
-    });
-  }
-
-  QueryBuilder<Exercise, int, QQueryOperations> defaultRestTimeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'defaultRestTime');
-    });
-  }
-
-  QueryBuilder<Exercise, int, QQueryOperations> defaultSetsProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'defaultSets');
-    });
-  }
-
   QueryBuilder<Exercise, bool, QQueryOperations> isLocalVideoProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isLocalVideo');
-    });
-  }
-
-  QueryBuilder<Exercise, bool, QQueryOperations> isTimedExerciseProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isTimedExercise');
     });
   }
 

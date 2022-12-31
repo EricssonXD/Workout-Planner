@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:workoutplanner/exercise_list/models/exercise.dart';
 
@@ -21,9 +20,9 @@ class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
   bool nameExists = false;
 
   final TextEditingController _controllerTitle = TextEditingController();
-  final TextEditingController _controllerReps = TextEditingController();
-  final TextEditingController _controllerSets = TextEditingController();
-  final TextEditingController _controllerRestTime = TextEditingController();
+  // final TextEditingController _controllerReps = TextEditingController();
+  // final TextEditingController _controllerSets = TextEditingController();
+  // final TextEditingController _controllerRestTime = TextEditingController();
 
   @override
   void initState() {
@@ -37,9 +36,9 @@ class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
       createNew = false;
       editing = false;
       _controllerTitle.text = targetExercise.name;
-      _controllerReps.text = targetExercise.defaultReps.toString();
-      _controllerSets.text = targetExercise.defaultSets.toString();
-      _controllerRestTime.text = targetExercise.defaultRestTime.toString();
+      // _controllerReps.text = targetExercise.defaultReps.toString();
+      // _controllerSets.text = targetExercise.defaultSets.toString();
+      // _controllerRestTime.text = targetExercise.defaultRestTime.toString();
     }
   }
 
@@ -49,10 +48,9 @@ class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
     void submitForm() {
       if (!_formKey.currentState!.validate()) return;
 
-      Exercise newExercise = Exercise()
-        ..name = _controllerTitle.text
-        ..defaultReps = int.parse(_controllerReps.text)
-        ..defaultSets = int.parse(_controllerSets.text);
+      Exercise newExercise = Exercise()..name = _controllerTitle.text;
+      // ..defaultReps = int.parse(_controllerReps.text)
+      // ..defaultSets = int.parse(_controllerSets.text);
       newExercise.id = targetExercise.id;
 
       ref.read(exerciseManagerProvider.future).then((value) async {
@@ -168,9 +166,9 @@ class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
         key: _formKey,
         child: Column(children: [
           titleForm(),
-          repForm(),
-          setForm(),
-          restTimeForm(),
+          // repForm(),
+          // setForm(),
+          // restTimeForm(),
         ]),
       ),
     );
@@ -199,75 +197,75 @@ class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
     );
   }
 
-  Widget setForm() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextFormField(
-        enabled: editing,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            _controllerSets.text = '3';
-          }
-          return null;
-        },
-        keyboardType: TextInputType.number,
-        controller: _controllerSets,
-        inputFormatters: <TextInputFormatter>[
-          FilteringTextInputFormatter.digitsOnly,
-        ],
-        decoration: const InputDecoration(
-          label: Text("Number of Sets"),
-          hintText: "3",
-        ),
-      ),
-    );
-  }
+  // Widget setForm() {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(8.0),
+  //     child: TextFormField(
+  //       enabled: editing,
+  //       validator: (value) {
+  //         if (value == null || value.isEmpty) {
+  //           _controllerSets.text = '3';
+  //         }
+  //         return null;
+  //       },
+  //       keyboardType: TextInputType.number,
+  //       controller: _controllerSets,
+  //       inputFormatters: <TextInputFormatter>[
+  //         FilteringTextInputFormatter.digitsOnly,
+  //       ],
+  //       decoration: const InputDecoration(
+  //         label: Text("Number of Sets"),
+  //         hintText: "3",
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget repForm() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextFormField(
-        enabled: editing,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            _controllerReps.text = "8";
-          }
-          return null;
-        },
-        keyboardType: TextInputType.number,
-        controller: _controllerReps,
-        inputFormatters: <TextInputFormatter>[
-          FilteringTextInputFormatter.digitsOnly,
-        ],
-        decoration: const InputDecoration(
-          label: Text("Number of Reps"),
-          hintText: "8",
-        ),
-      ),
-    );
-  }
+  // Widget repForm() {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(8.0),
+  //     child: TextFormField(
+  //       enabled: editing,
+  //       validator: (value) {
+  //         if (value == null || value.isEmpty) {
+  //           _controllerReps.text = "8";
+  //         }
+  //         return null;
+  //       },
+  //       keyboardType: TextInputType.number,
+  //       controller: _controllerReps,
+  //       inputFormatters: <TextInputFormatter>[
+  //         FilteringTextInputFormatter.digitsOnly,
+  //       ],
+  //       decoration: const InputDecoration(
+  //         label: Text("Number of Reps"),
+  //         hintText: "8",
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget restTimeForm() {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextFormField(
-        enabled: editing,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            _controllerRestTime.text = "60";
-          }
-          return null;
-        },
-        keyboardType: TextInputType.number,
-        controller: _controllerRestTime,
-        inputFormatters: <TextInputFormatter>[
-          FilteringTextInputFormatter.digitsOnly,
-        ],
-        decoration: const InputDecoration(
-          label: Text("Rest Time"),
-          hintText: "60",
-        ),
-      ),
-    );
-  }
+  // Widget restTimeForm() {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(8.0),
+  //     child: TextFormField(
+  //       enabled: editing,
+  //       validator: (value) {
+  //         if (value == null || value.isEmpty) {
+  //           _controllerRestTime.text = "60";
+  //         }
+  //         return null;
+  //       },
+  //       keyboardType: TextInputType.number,
+  //       controller: _controllerRestTime,
+  //       inputFormatters: <TextInputFormatter>[
+  //         FilteringTextInputFormatter.digitsOnly,
+  //       ],
+  //       decoration: const InputDecoration(
+  //         label: Text("Rest Time"),
+  //         hintText: "60",
+  //       ),
+  //     ),
+  //   );
+  // }
 }

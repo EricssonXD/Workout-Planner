@@ -14,13 +14,13 @@ class Exercise {
   @Index(type: IndexType.value, unique: true, caseSensitive: false)
   String name = "";
 
-  int defaultRestTime = 120;
+  // int defaultRestTime = 120;
 
-  int defaultReps = 12;
+  // int defaultReps = 12;
 
-  bool isTimedExercise = false;
+  // bool isTimedExercise = false;
 
-  int defaultSets = 3;
+  // int defaultSets = 3;
 
   List<String> tags = List.empty(growable: true);
 
