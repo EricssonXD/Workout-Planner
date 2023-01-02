@@ -9,7 +9,6 @@ Future main() async {
 
   runApp(const ProviderScope(
       child: App())); //Wrap in provider scope for riverpod to work
-  // runApp(const Nothing()); //Wrap in provider scope for riverpod to work
 }
 
 class App extends ConsumerWidget {
@@ -24,21 +23,3 @@ class App extends ConsumerWidget {
     );
   }
 }
-
-// class Nothing extends StatelessWidget {
-//   const Nothing({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return ProviderScope(
-//       child: MaterialApp(
-//         home: Scaffold(
-//           appBar: AppBar(
-//             title: const Text("Nothing"),
-//           ),
-//           body: const Text("Nothing"),
-//         ),
-//       ),
-//     );
-//   }
-// }

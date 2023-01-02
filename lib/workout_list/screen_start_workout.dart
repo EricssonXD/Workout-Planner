@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:workoutplanner/utils/widgets/aleart_dialogs.dart';
 import 'package:workoutplanner/workout_list/models/workouts.dart';
 
 class StartWorkoutScreen extends ConsumerStatefulWidget {
@@ -30,6 +31,8 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
   int maxTime = 60;
   bool overTime = false;
   bool resting = false;
+
+  OverlayEntry? completeAnimation;
 
   final alarm = AudioPlayer();
 
@@ -80,6 +83,7 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
   }
 
   void nextTask() {
+    // showCompleteOverlay();
     setState(() {
       currentItem = nextItem;
       // print("Index $currentIndex => ${currentIndex + 1}");
@@ -91,6 +95,49 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
       }
     });
   }
+
+  // void showCompleteOverlay() {
+  //   if (completeAnimation != null) {
+  //     completeAnimation!.remove();
+  //     completeAnimation = null;
+  //   }
+  //   completeAnimation = OverlayEntry(
+  //     builder: (context) => Center(
+  //       child: SizedBox(
+  //         width: 100,
+  //         height: 100,
+  //         child: Stack(
+  //           fit: StackFit.expand,
+  //           children: [
+  //             FittedBox(
+  //               fit: BoxFit.contain,
+  //               child: Icon(
+  //                 Icons.check,
+  //                 color: Theme.of(context).primaryColor,
+  //               ),
+  //             ),
+  //             CustomPaint(
+  //               painter: CirclePainter(strokeWidth: 8),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  //   final overlay = Overlay.of(context);
+
+  //   overlay.insert(completeAnimation!);
+
+  //   Future.delayed(
+  //     const Duration(seconds: 1),
+  //     () {
+  //       if (completeAnimation != null) {
+  //         completeAnimation!.remove();
+  //         completeAnimation = null;
+  //       }
+  //     },
+  //   );
+  // }
 
   @override
   void initState() {
@@ -133,7 +180,8 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        return await showConfirmQuitDialog(context) ?? false;
+        return await showYesNoDialog(context,
+            title: "Are you sure you want to quit?");
       },
       child: Scaffold(
         appBar: AppBar(
@@ -262,7 +310,7 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
                     ]
                   : [
                       Text(
-                        "Next Exercise:",
+                        "Next Up:",
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       Text(
@@ -295,10 +343,18 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
               stopTimer();
               nextTask();
               resting = false;
-            } else if (currentItem.restTime > 0) {
-              rest(currentItem.restTime);
             } else {
-              nextTask();
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                content: Text("Completed Exercise"),
+                duration: Duration(milliseconds: 500),
+                behavior: SnackBarBehavior.floating,
+              ));
+
+              if (currentItem.restTime > 0) {
+                rest(currentItem.restTime);
+              } else {
+                nextTask();
+              }
             }
           },
           child: Text(resting
@@ -326,43 +382,6 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
             }
           },
           child: const Text("Previous")),
-    );
-  }
-
-  Future<bool?> showConfirmQuitDialog(BuildContext context) {
-    // set up the button
-    Widget okButton = TextButton(
-      child: Text(
-        "Yes",
-        style: Theme.of(context).textTheme.titleSmall,
-      ),
-      onPressed: () => Navigator.of(context).pop(true),
-    );
-
-    Widget cancelButton = TextButton(
-      child: Text(
-        "No",
-        style: Theme.of(context).textTheme.titleSmall,
-      ),
-      onPressed: () => Navigator.of(context).pop(false),
-    );
-
-    // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title: const Text("Are you sure you want to quit?"),
-      // content: const Text("This is my message."),
-      actions: [
-        cancelButton,
-        okButton,
-      ],
-    );
-
-    // show the dialog
-    return showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
     );
   }
 

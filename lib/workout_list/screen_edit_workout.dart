@@ -435,6 +435,7 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
               });
             },
             title: const Center(child: Text("Insert New Exercise"))),
+        const Divider(height: 0),
         ListTile(
             onTap: () => setState(() {
                   workoutItemList.remove(item);

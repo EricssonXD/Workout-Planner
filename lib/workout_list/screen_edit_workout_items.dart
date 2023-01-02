@@ -79,9 +79,10 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
     void submitForm() {
       if (!_formKey.currentState!.validate()) return;
       if (pickedExercise == null) {
-        ScaffoldMessenger.of(context).removeCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Please pick an Exercise")));
+        ScaffoldMessenger.of(context)
+          ..removeCurrentSnackBar()
+          ..showSnackBar(
+              const SnackBar(content: Text("Please pick an Exercise")));
         return;
       }
 
