@@ -349,7 +349,6 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
                 duration: Duration(milliseconds: 500),
                 behavior: SnackBarBehavior.floating,
               ));
-
               if (currentItem.restTime > 0) {
                 rest(currentItem.restTime);
               } else {

@@ -31,6 +31,8 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   isar_generator: ^3.0.5
   riverpod_generator: ^1.0.6
+  flutter_launcher_icons: ^0.11.0
+  flutter_native_splash: ^2.2.16
 
 
 
@@ -41,10 +43,14 @@ flutter:
   assets:
     - assets/
   
-  
-  
-  
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/misc/logo.png"
 
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/misc/logo.png    
   
   
 

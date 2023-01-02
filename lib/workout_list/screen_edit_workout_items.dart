@@ -43,6 +43,11 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
     setFields();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void setFields() {
     if (widget.targetWorkoutItem != null) {
       targetWorkoutItem = widget.targetWorkoutItem!;
@@ -69,6 +74,7 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
   @override
   Widget build(BuildContext context) {
     void exit() {
+      ScaffoldMessenger.of(context).removeCurrentSnackBar();
       if (createNew && pickedExercise == null) {
         Navigator.of(context).pop();
       } else {
@@ -123,7 +129,6 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
                 shape: MaterialStatePropertyAll(
                     BeveledRectangleBorder(borderRadius: BorderRadius.zero))),
             onPressed: () {
-              // Navigator.of(context).pop();
               setFields();
             },
             child: const Text("Cancel")),
@@ -137,7 +142,7 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
               shape: MaterialStatePropertyAll(
                   BeveledRectangleBorder(borderRadius: BorderRadius.zero))),
           onPressed: () {
-            Navigator.of(context).pop();
+            exit();
           },
           child: const Text("Back"));
     }
@@ -188,7 +193,7 @@ class _WorkoutItemEditScreenState extends ConsumerState<WorkoutItemEditScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      cancelButton(),
+                      if (!createNew) cancelButton(),
                       submitButton(),
                     ],
                   )

@@ -9,9 +9,22 @@
             "command": "dart run build_runner watch",
             "problemMatcher": [],
             "runOptions": {
-                "runOn": "folderOpen",
+                "runOn": "folderOpen"
             }
-            
-        }
+        },
+        {
+            "label": "Build Icon",
+            "type": "shell",
+            "command": "flutter pub run flutter_launcher_icons:main",
+            "problemMatcher": [],
+            "runOptions": {}
+        },
+        {
+            "label": "Build Splashscreen",
+            "type": "shell",
+            "command": "flutter pub run flutter_native_splash:create",
+            "problemMatcher": [],
+            "runOptions": {}
+        },
     ]
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -17,7 +18,7 @@ Future<Isar> isarInstance(FutureProviderRef ref) async {
         ExerciseSchema,
         WorkoutSchema,
       ],
-      inspector: true,
+      inspector: kDebugMode ? true : false,
       directory: dir.path,
     );
   } else {
