@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'isar.dart';
+part of 'themes.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -29,13 +29,19 @@ class _SystemHash {
   }
 }
 
-String $isarInstanceHash() => r'eca89e2abee20faf28c0c0aa0d3d7d80e29ca224';
+String $ThemeManagerHash() => r'b55a18e54318decb4e5b23a1becbf0b9f9494425';
 
-/// See also [isarInstance].
-final isarInstanceProvider = FutureProvider<Isar>(
-  isarInstance,
-  name: r'isarInstanceProvider',
+/// See also [ThemeManager].
+final themeManagerProvider =
+    AutoDisposeAsyncNotifierProvider<ThemeManager, ThemeData>(
+  ThemeManager.new,
+  name: r'themeManagerProvider',
   debugGetCreateSourceHash:
-      const bool.fromEnvironment('dart.vm.product') ? null : $isarInstanceHash,
+      const bool.fromEnvironment('dart.vm.product') ? null : $ThemeManagerHash,
 );
-typedef IsarInstanceRef = FutureProviderRef<Isar>;
+typedef ThemeManagerRef = AutoDisposeAsyncNotifierProviderRef<ThemeData>;
+
+abstract class _$ThemeManager extends AutoDisposeAsyncNotifier<ThemeData> {
+  @override
+  FutureOr<ThemeData> build();
+}

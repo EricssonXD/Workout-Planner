@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+part 'themes.g.dart';
 
 class AppTheme {
   TextTheme myTextTheme = const TextTheme();
@@ -32,10 +35,58 @@ class AppTheme {
       );
 }
 
-final themeProvider = StateProvider<ThemeData>((ref) {
-  if (ThemeMode.system == ThemeMode.dark) {
-    return AppTheme().darkTheme;
-  } else {
-    return AppTheme().redTheme;
+@riverpod
+class ThemeManager extends _$ThemeManager {
+  // ThemeManager() {
+  //   initTheme();
+  // }
+
+  // initTheme() async {
+  //   await _loadPrefs();
+  //   FlutterNativeSplash.remove();
+  // }
+
+  late SharedPreferences _pref;
+
+  final String keyTheme = "theme";
+
+  String _theme = "dark";
+
+  _initPrefs() async {
+    _pref = await SharedPreferences.getInstance();
   }
-});
+
+  _loadPrefs() async {
+    await _initPrefs();
+    _theme = _pref.getString(keyTheme) ?? "dark";
+  }
+
+  _savePrefs() async {
+    await _initPrefs();
+    _pref.setString(keyTheme, _theme);
+  }
+
+  setTheme(String newTheme) async {
+    _theme = newTheme;
+    _savePrefs();
+    state = AsyncValue.data(await build());
+  }
+
+  @override
+  FutureOr<ThemeData> build() async {
+    await _loadPrefs();
+    debugPrint("Ayo $_theme");
+    switch (_theme) {
+      case "dark":
+        return AppTheme().darkTheme;
+      case "red":
+        return AppTheme().redTheme;
+      default:
+        if (ThemeMode.system == ThemeMode.dark) {
+          return AppTheme().darkTheme;
+        } else {
+          return AppTheme().redTheme;
+        }
+    }
+  }
+}

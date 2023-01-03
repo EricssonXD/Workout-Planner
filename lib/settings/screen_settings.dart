@@ -17,7 +17,8 @@ class _SettingScreenState extends ConsumerState<SettingScreen> {
 
   @override
   void initState() {
-    if (ref.read(themeProvider).colorScheme.primary == Colors.grey[700]) {
+    if (ref.read(themeManagerProvider).value?.colorScheme.primary ==
+        Colors.grey[700]) {
       _isDarkTheme = true;
     } else {
       _isDarkTheme = false;
@@ -73,10 +74,8 @@ class _SettingScreenState extends ConsumerState<SettingScreen> {
                 _isDarkTheme = value;
               });
               value
-                  ? ref.read(themeProvider.notifier).state =
-                      AppTheme().darkTheme
-                  : ref.read(themeProvider.notifier).state =
-                      AppTheme().redTheme;
+                  ? ref.read(themeManagerProvider.notifier).setTheme("dark")
+                  : ref.read(themeManagerProvider.notifier).setTheme("red");
             },
           ),
         ],
