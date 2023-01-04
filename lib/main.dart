@@ -20,10 +20,9 @@ class App extends ConsumerWidget {
     final ThemeData? themeProvider = ref.watch(themeManagerProvider).value;
 
     if (themeProvider != null) {
-      debugPrint("now remove the splash");
       FlutterNativeSplash.remove();
     } else {
-      return Container();
+      return const MaterialApp();
     }
 
     return MaterialApp(

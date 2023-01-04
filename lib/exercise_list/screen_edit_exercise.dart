@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:workoutplanner/exercise_list/models/exercise.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+
+import '../utils/widgets/aleart_dialogs.dart';
 
 class ExerciseEditScreen extends ConsumerStatefulWidget {
   const ExerciseEditScreen({super.key, this.targetExercise});
@@ -113,6 +116,34 @@ class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
     }
 
     return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: createNew
+          ? null
+          : SpeedDial(
+              overlayOpacity: 0,
+              animatedIcon: AnimatedIcons.menu_close,
+              children: [
+                SpeedDialChild(
+                  child: const Icon(Icons.delete),
+                  label: "Delete Exercise",
+                  onTap: () async {
+                    bool answer = await showYesNoDialog(context,
+                        title:
+                            "Are you sure you want to delete this Exercise?");
+                    if (answer) {
+                      bool success = false;
+                      await ref
+                          .read(exerciseManagerProvider.future)
+                          .then((value) async {
+                        success = await value.deleteExercise(targetExercise.id);
+                      });
+                      // ignore: use_build_context_synchronously
+                      success ? Navigator.of(context).pop() : null;
+                    }
+                  },
+                ),
+              ],
+            ),
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -149,13 +180,16 @@ class _ExerciseEditScreenState extends ConsumerState<ExerciseEditScreen> {
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         child: BottomAppBar(
+          clipBehavior: Clip.hardEdge,
+          notchMargin: 4,
+          shape: const CircularNotchedRectangle(),
           height: 50,
           child: editing
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    cancelButton(),
+                    if (!createNew) cancelButton(),
                     submitButton(),
                   ],
                 )

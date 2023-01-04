@@ -127,6 +127,22 @@ class WorkoutManager {
     }
   }
 
+  Future<bool> deleteWorkout(int id) async {
+    try {
+      bool success = true;
+      await isar.writeTxn(() async {
+        success = await isar.workouts.delete(id);
+      });
+      return success;
+    } catch (e) {
+      if (e.runtimeType == IsarError) {
+        debugPrint(e.toString());
+        return false;
+      }
+      rethrow;
+    }
+  }
+
   Future<List<Workout>> getWorkouts() async {
     return isar.workouts.where().sortByName().findAll();
   }

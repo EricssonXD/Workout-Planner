@@ -1,9 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:isar/isar.dart';
 import 'package:workoutplanner/exercise_list/models/exercise.dart';
 import 'package:workoutplanner/utils/providers/isar.dart';
+import 'package:workoutplanner/utils/widgets/aleart_dialogs.dart';
 import 'package:workoutplanner/workout_list/models/workouts.dart';
 import 'package:workoutplanner/workout_list/screen_start_workout.dart';
 
@@ -168,6 +170,35 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
         return await showConfirmDiscardDialog(context) ?? false;
       },
       child: Scaffold(
+        floatingActionButtonLocation:
+            FloatingActionButtonLocation.miniEndDocked,
+        floatingActionButton: createNew
+            ? null
+            : SpeedDial(
+                overlayOpacity: 0,
+                animatedIcon: AnimatedIcons.menu_close,
+                children: [
+                  SpeedDialChild(
+                    child: const Icon(Icons.delete),
+                    label: "Delete Workout",
+                    onTap: () async {
+                      bool answer = await showYesNoDialog(context,
+                          title:
+                              "Are you sure you want to delete this Workout?");
+                      if (answer) {
+                        bool success = false;
+                        await ref
+                            .read(workoutManagerProvider.future)
+                            .then((value) async {
+                          success = await value.deleteWorkout(targetWorkout.id);
+                        });
+                        // ignore: use_build_context_synchronously
+                        success ? Navigator.of(context).pop() : null;
+                      }
+                    },
+                  ),
+                ],
+              ),
         appBar: AppBar(
           title: createNew
               ? const Text("New Workout")
@@ -198,15 +229,22 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
           child: BottomAppBar(
-              height: 50,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  editing ? cancelButton() : Container(),
-                  editing ? submitButton() : startButton(),
-                ],
-              )),
+            // padding: EdgeInsets.only(
+            //   bottom: MediaQuery.of(context).viewInsets.bottom,
+            // ),
+            shape: const CircularNotchedRectangle(),
+            notchMargin: 4.0,
+            clipBehavior: Clip.hardEdge,
+            height: 50,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                if (editing && !createNew) cancelButton(),
+                editing ? submitButton() : startButton(),
+              ],
+            ),
+          ),
         ),
         body: Form(
           key: _formKey,

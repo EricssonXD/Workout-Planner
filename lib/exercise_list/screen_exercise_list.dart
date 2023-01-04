@@ -49,10 +49,10 @@ class _ExerciseListState extends ConsumerState<ExerciseList> {
         overlayOpacity: 0,
         animatedIcon: AnimatedIcons.menu_close,
         children: [
-          SpeedDialChild(
-            child: const Icon(Icons.delete),
-            label: "Delete",
-          ),
+          // SpeedDialChild(
+          //   child: const Icon(Icons.delete),
+          //   label: "Delete",
+          // ),
           SpeedDialChild(
             child: const Icon(Icons.add),
             label: "Add New",

@@ -57,6 +57,22 @@ class ExerciseManager {
     }
   }
 
+  Future<bool> deleteExercise(int id) async {
+    try {
+      bool success = true;
+      await isar.writeTxn(() async {
+        success = await isar.exercises.delete(id);
+      });
+      return success;
+    } catch (e) {
+      if (e.runtimeType == IsarError) {
+        debugPrint(e.toString());
+        return false;
+      }
+      rethrow;
+    }
+  }
+
   Future<List<Exercise>> getExercises() async {
     return isar.exercises.where().sortByName().findAll();
   }
