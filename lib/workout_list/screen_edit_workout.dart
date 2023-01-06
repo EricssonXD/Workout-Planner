@@ -99,6 +99,11 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // currentUid = 0;
+    // for (int i = 0; i < workoutItemList.length; i++) {
+    //   workoutItemList[i].uid = i;
+    //   currentUid++;
+    // }
     Widget submitButton() {
       return Expanded(
         child: ElevatedButton(
@@ -306,8 +311,7 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
                         .then((value) {
                       if (value.runtimeType == WorkoutItem) {
                         setState(() {
-                          value.uid = currentUid;
-                          currentUid++;
+                          value.uid = currentUid++;
                           workoutItemList.add(value);
                           submitForm();
                         });
@@ -463,8 +467,7 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
                   .then((value) {
                 if (value.runtimeType == WorkoutItem) {
                   setState(() {
-                    value.uid = currentUid;
-                    currentUid++;
+                    value.uid = currentUid++;
                     workoutItemList.insert(
                         workoutItemList.indexOf(item) + 1, value);
                     submitForm();
@@ -473,6 +476,16 @@ class _WorkoutEditScreenState extends ConsumerState<WorkoutEditScreen> {
               });
             },
             title: const Center(child: Text("Insert New Exercise"))),
+        const Divider(height: 0),
+        ListTile(
+            onTap: () {
+              WorkoutItem temp = WorkoutItem().from(item)..uid = currentUid++;
+              setState(() {
+                workoutItemList.insert(workoutItemList.indexOf(item) + 1, temp);
+                Navigator.of(context).pop();
+              });
+            },
+            title: const Center(child: Text("Duplicate Exercise"))),
         const Divider(height: 0),
         ListTile(
             onTap: () => setState(() {

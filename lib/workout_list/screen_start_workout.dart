@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:isar/isar.dart';
 import 'package:workoutplanner/utils/notification_manager.dart';
 import 'package:workoutplanner/utils/widgets/aleart_dialogs.dart';
 import 'package:workoutplanner/workout_list/models/workouts.dart';
@@ -19,19 +20,18 @@ class StartWorkoutScreen extends ConsumerStatefulWidget {
 
 class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
   late final Workout workout;
-  late final List<WorkoutItem> rundown;
+  late final List<_RunDownItem> rundown;
 
-  late WorkoutItem nextItem;
-  late WorkoutItem currentItem;
+  late _RunDownItem nextItem;
+  late _RunDownItem currentItem;
   int currentIndex = 0;
+  bool resting = false;
   bool workoutFinished = false;
-  List<int> setNumber = [];
 
   Timer timer = Timer(const Duration(seconds: 0), () {});
   int timerLeft = 60;
   int maxTime = 60;
   bool overTime = false;
-  bool resting = false;
 
   OverlayEntry? completeAnimation;
 
@@ -69,26 +69,27 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
   }
 
   void stopTimer() {
+    alarm.stop();
     timer.cancel();
   }
 
   void previousTask() {
     stopTimer();
     setState(() {
-      // print("Index $currentIndex => ${currentIndex - 1}");
       currentIndex--;
-      nextItem = currentItem;
-      currentItem = rundown[currentIndex];
-      resting = false;
       workoutFinished = false;
+      if (!resting) {
+        nextItem = currentItem;
+        currentItem = rundown[currentIndex];
+      }
+      resting = false;
     });
   }
 
   void nextTask() {
-    // showCompleteOverlay();
+    stopTimer();
     setState(() {
       currentItem = nextItem;
-      // print("Index $currentIndex => ${currentIndex + 1}");
       currentIndex++;
       if (currentIndex < rundown.length - 1) {
         nextItem = rundown[currentIndex + 1];
@@ -98,68 +99,28 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
     });
   }
 
-  // void showCompleteOverlay() {
-  //   if (completeAnimation != null) {
-  //     completeAnimation!.remove();
-  //     completeAnimation = null;
-  //   }
-  //   completeAnimation = OverlayEntry(
-  //     builder: (context) => Center(
-  //       child: SizedBox(
-  //         width: 100,
-  //         height: 100,
-  //         child: Stack(
-  //           fit: StackFit.expand,
-  //           children: [
-  //             FittedBox(
-  //               fit: BoxFit.contain,
-  //               child: Icon(
-  //                 Icons.check,
-  //                 color: Theme.of(context).primaryColor,
-  //               ),
-  //             ),
-  //             CustomPaint(
-  //               painter: CirclePainter(strokeWidth: 8),
-  //             ),
-  //           ],
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  //   final overlay = Overlay.of(context);
-
-  //   overlay.insert(completeAnimation!);
-
-  //   Future.delayed(
-  //     const Duration(seconds: 1),
-  //     () {
-  //       if (completeAnimation != null) {
-  //         completeAnimation!.remove();
-  //         completeAnimation = null;
-  //       }
-  //     },
-  //   );
-  // }
-
   @override
   void initState() {
     super.initState();
 
     workout = widget.workout;
 
-    List<WorkoutItem> tempList = [];
+    List<_RunDownItem> tempList = [];
     for (int i = 0; i < workout.workoutItems.length; i++) {
       for (int j = 0; j < workout.workoutItems[i].sets; j++) {
         WorkoutItem item = WorkoutItem().from(workout.workoutItems[i]);
-        setNumber.add(j + 1);
-        tempList.add(item);
+        tempList.add(_RunDownItem(
+          workoutItem: item,
+          setNow: j + 1,
+          itemIndex: i,
+        ));
       }
     }
 
     rundown = tempList;
     currentItem = rundown[0];
 
-    if (currentItem.exerciseCountType == ExerciseRepType.timed) {
+    if (currentItem.repType == ExerciseRepType.timed) {
       startTimer(currentItem.reps);
     }
 
@@ -214,7 +175,7 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
   }
 
   Widget exerciseProgress() {
-    switch (currentItem.exerciseCountType) {
+    switch (currentItem.repType) {
       case ExerciseRepType.reps:
         return Expanded(
           child: Align(
@@ -287,8 +248,7 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
                       currentItem.name,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    Text(
-                        "Set ${setNumber[currentIndex].toString()}/${currentItem.sets}"),
+                    Text("Set ${currentItem.setNow}/${currentItem.setTotal}"),
                   ],
           ),
         ),
@@ -320,7 +280,7 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       Text(
-                          "${nextItem.reps} ${nextItem.exerciseCountType} | Set ${setNumber[currentIndex + 1].toString()}/${nextItem.sets} | ${nextItem.restTime}s Rest"),
+                          "${nextItem.reps} ${nextItem.repType} | Set ${nextItem.setNow}/${nextItem.setTotal} | ${nextItem.rest}s Rest"),
                     ],
             )),
       ),
@@ -342,7 +302,6 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
               return;
             }
             if (resting) {
-              stopTimer();
               nextTask();
               resting = false;
             } else {
@@ -351,8 +310,8 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
                 duration: Duration(milliseconds: 500),
                 behavior: SnackBarBehavior.floating,
               ));
-              if (currentItem.restTime > 0) {
-                rest(currentItem.restTime);
+              if (currentItem.rest > 0) {
+                rest(currentItem.rest);
               } else {
                 nextTask();
               }
@@ -413,4 +372,27 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
       },
     );
   }
+}
+
+class _RunDownItem {
+  _RunDownItem({
+    required WorkoutItem workoutItem,
+    required this.setNow,
+    required this.itemIndex,
+  }) {
+    name = workoutItem.name;
+    repType = workoutItem.exerciseCountType;
+    rest = workoutItem.restTime;
+    reps = workoutItem.reps;
+    setTotal = workoutItem.sets;
+  }
+
+  // WorkoutItem workoutItem;
+  short setNow;
+  short itemIndex;
+  late String name;
+  late short setTotal;
+  late short reps;
+  late short rest;
+  late ExerciseRepType repType;
 }
