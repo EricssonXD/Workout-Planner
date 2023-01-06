@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:workoutplanner/utils/notification_manager.dart';
 import 'package:workoutplanner/utils/widgets/aleart_dialogs.dart';
 import 'package:workoutplanner/workout_list/models/workouts.dart';
 
@@ -55,6 +56,7 @@ class _StartWorkoutScreenState extends ConsumerState<StartWorkoutScreen> {
           overTime = true;
           if (timerLeft == 0) {
             playAlarm();
+            resting ? NotificationManager.restTimeOver() : null;
           }
         }
       });

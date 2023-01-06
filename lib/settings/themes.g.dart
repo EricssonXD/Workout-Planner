@@ -29,7 +29,7 @@ class _SystemHash {
   }
 }
 
-String $ThemeManagerHash() => r'b55a18e54318decb4e5b23a1becbf0b9f9494425';
+String $ThemeManagerHash() => r'9e17c86545892421121cea6b151a713dfa8ac00e';
 
 /// See also [ThemeManager].
 final themeManagerProvider =

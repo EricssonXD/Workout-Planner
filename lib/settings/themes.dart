@@ -37,15 +37,6 @@ class AppTheme {
 
 @riverpod
 class ThemeManager extends _$ThemeManager {
-  // ThemeManager() {
-  //   initTheme();
-  // }
-
-  // initTheme() async {
-  //   await _loadPrefs();
-  //   FlutterNativeSplash.remove();
-  // }
-
   late SharedPreferences _pref;
 
   final String keyTheme = "theme";
@@ -75,7 +66,7 @@ class ThemeManager extends _$ThemeManager {
   @override
   FutureOr<ThemeData> build() async {
     await _loadPrefs();
-    debugPrint("Ayo $_theme");
+    // debugPrint("Ayo $_theme");
     switch (_theme) {
       case "dark":
         return AppTheme().darkTheme;
